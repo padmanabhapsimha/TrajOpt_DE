@@ -1,4 +1,9 @@
 # TrajOpt_DE
+SOME PARTS OF THE CODE ARE RATHER DEVOID OF DOCUMENTATION.. 
+READ THE INDIVIDUAL README FILES FOR INPUTS.
+EDIT THE MAKEFILE TO POINT TO THE ACTUAL LOCATION OF THE BOOST LIBRARY IN THE SYSTEM. SPECIFICALLY THE $(INC) THINGY.
+SORRY FOR SHOUTING..!! THE ACTUAL README FOLLOWS THIS.
+# Actual readme stuff - maybe
 Spacecraft trajectory optimization using differential evolution (DE).
 At the heart of this code lies a multiple thread capable differential evolution based optimizer. 
 Coarse grain parallelized by decomposition of initial population.
