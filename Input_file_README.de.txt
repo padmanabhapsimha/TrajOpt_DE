@@ -47,3 +47,5 @@ Problem cost function listing
 24 - 2D continuous thrusting r based integration termination min fuel
 25 - 3D continuous thrusting fuel optimal general code
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+26 - 3d continuous thrusting fuel optimal with frame switching (multiple bodies)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
