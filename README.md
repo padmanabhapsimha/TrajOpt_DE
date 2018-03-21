@@ -1,22 +1,12 @@
 # TrajOpt_DE
-Pardon me for the following section.
-SOME FILES OF THE CODE ARE RATHER DEVOID OF DOCUMENTATION (THESE ARE RELATED TO THE ACTUAL SPACECRAFT STATE AND COSTATE DYNAMICS)
-THE REST SEEMS REASONABLY OK. I KNOW THAT THE FILES ARE NOT VERY WELL ORGANIZED INTO DIRECTORIES BUT HEY, IT WORKS.. SO DON'T BREAK IT YET...!!!!
-READ THE INDIVIDUAL README FILES FOR INPUTS.
-EDIT THE MAKEFILE TO POINT TO THE ACTUAL LOCATION OF THE BOOST LIBRARY IN THE SYSTEM. SPECIFICALLY THE $(INC) THINGY.
-SORRY FOR SHOUTING..!! THE ACTUAL README FOLLOWS THIS.
-# Actual readme stuff - maybe
-Spacecraft trajectory optimization using differential evolution (DE).
-At the heart of this code lies a multiple thread capable differential evolution based optimizer. 
-Coarse grain parallelized by decomposition of initial population.
-Run in distributed systems by manual decomposition of domains.
-Wide variety of benchmark problems hard coded in a long switch-case construct. Eliminate this
+This code can optimize continuous low thrust spacecraft trajectories by solving the two point boundary value problem that results from the application of the Pontryagin's minimum principle. At the heart of this code lies a multiple thread capable optimization routine based on Differential Evolution (Refer to Storn and Price for details). This version of the code is coarse grain parallelized by domain decomposition. This has been designed for shared memory parallel systems. Can be run in distributed systems by manual decomposition of the search hyperbox. This is a full 3D code and is quite capable of handling arbitrary thruster performance characteristics. Nuclear electric and inverse square solar electric thrust models have been hard coded in. Other exotic thrusters can be manually put in along with stuff like eclipsing of the Sun etc. This code can as of now handle transfers between arbitrary parking orbits of different planets. (Earth-Mars transfer from 25000km EPO at -23.4 degrees to Earth equator to 17500km MPO at 90 degrees to the ecliptic plane has been verified)
+GTO to GSO transfers have also been verified and have been compared with results from literature. Better optimal results have been obtained. 3D to 3D heliocentric transfer portion of this code as of now is the most capable and tested part.
+# Actual readme stuff - Important info
+Read individual input file readme(s) for supplying the inputs.
+Boost library header files are absolutely essential. Version 1.66.0 has been used. 
+Wide variety of benchmark problems hard coded in a long switch-case construct. Eliminate this if not needed.
 # cpp files
-de_solver.cpp has the actual DE solver coded in (Refer Storn and Price for more details). Knuth shuffle is used as a nifty little trick here for making the implementation much cleaner. de_func.cpp generates the initial population and some other stuff. Other files are mostly for support and modularity. cost_fn.cpp and cost_fn_print.cpp are absolutely bloated and can be trimmed out if parts are not necessary.
-# Trajectory Optimization
-Indirect optimal control theory with the application of Pontryagin's minimum principle.
-Resulting two point boundary value problem (TPBVP) solved using the DE optimizer.
-Full 3D trajectories have been generated.
+de_solver.cpp has the parallelized version of the DE solver coded. Durstenfeld's version of the Fisher-Yates shuffle is used as a nifty little trick here for making the implementation much cleaner. de_func.cpp generates the initial population and some other stuff. Other files are mostly for support and modularity. cost_fn.cpp and cost_fn_print.cpp are absolutely bloated and can be trimmed out if parts are not necessary.
 # Other related stuff
 64bit C++17 standard. Originally compiled with g++ 7.2.0
 STL and Boost libraries have been heavily used.
