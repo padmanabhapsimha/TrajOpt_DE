@@ -61,11 +61,11 @@ auto agent_selector=[&](const unsigned int &agntno){
     /**< ***MARGINALLY BETTER THAN NAIVE METHOD FOR THIS SMALL PROBLEM*** */
     /**< IN CASE MORE DISTINCT RANDOM AGEENTS ARE NEEDED, THIS WILL OUTPERFORM THE NAIVE TECHNIQUE */
     std::swap(indices.at(agntno),(indices.at(agents_no-1)));
-    ind_a=randgen_int3();
+    ind_a=randgen_int3();///rand numbers from 0 to np-1
     std::swap(indices.at(ind_a),(indices.at(agents_no-2)));
-    ind_b=randgen_int4();
+    ind_b=randgen_int4();///rand numbers from 0 to np-2
     std::swap(indices.at(ind_b),(indices.at(agents_no-3)));
-    ind_c=randgen_int5();
+    ind_c=randgen_int5();///rand numbers from 0 to np-3
     ///UNSWAP INDICES VECTOR IN REVERSE ORDER FOR NEXT USE
     std::swap(indices.at(ind_b),(indices.at(agents_no-3)));
     std::swap(indices.at(ind_a),(indices.at(agents_no-2)));

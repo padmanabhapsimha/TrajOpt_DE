@@ -8,6 +8,7 @@
 #include<iostream>
 #include<boost/numeric/odeint.hpp>
 /// ///////////////////////////////////////////////////////////////////////////////
+namespace fileLocal_3bodyfunction{
 std::fstream fileout2("Output.txt",std::ios::out);
 auto write_cout=[&](const auto &xfr1,const auto &xfr2,const double &t)
 {
@@ -20,6 +21,7 @@ auto write_cout=[&](const auto &xfr1,const auto &xfr2,const double &t)
     }
     fileout2<<t<<std::endl;
 };
+}
 /// ///////////////////////////////////////////////////////////////////////////////
 auto sqr=[](const auto &x){return x*x;};
 auto cube=[](const auto &x){return x*x*x;};
@@ -35,9 +37,10 @@ const double pi=3.1415926535897932384626433832795028;
 Agent_datatype _3body_cost(sys_pars<Agent_datatype> &params,const std::vector<Agent_datatype> &vals,const bool printval,
                            Agent_datatype &massfrac)
 {
+    using namespace fileLocal_3bodyfunction;
     /// ///////////////////////////////////////////////////////////////////////////////
     /// CONTROLLED STEPPERS
-    auto controlled_switch_stepper=make_controlled(params.integ_tol,params.integ_tol,params.maxstep*86400.0,switch_stepper());
+    auto controlled_switch_stepper=make_controlled(params.integ_tol,params.integ_tol,0.5*params.maxstep*86400.0,switch_stepper());
     auto controlled_stepper=make_controlled(params.integ_tol,params.integ_tol,params.maxstep*86400.0,stepper_type());
     /// ///////////////////////////////////////////////////////////////////////////////
     wrappy_jpl Ephem_obj(params.ephem_file);///ephemeris object
@@ -63,11 +66,11 @@ Agent_datatype _3body_cost(sys_pars<Agent_datatype> &params,const std::vector<Ag
         x=xstate.at(0);y=xstate.at(1);z=xstate.at(2);vx=xstate.at(3);vy=xstate.at(4);vz=xstate.at(5);m=xstate.at(6);
         lx=xstate.at(7);ly=xstate.at(8);lz=xstate.at(9);lvx=xstate.at(10);lvy=xstate.at(11);lvz=xstate.at(12);lm=xstate.at(13);
         r=sqrt(sqr(x)+sqr(y)+sqr(z));r3=cube(r);r4=r3*r;
-        Ephem_obj.JPL_ecliptic_m_get(julianstart+t/86400.0,3,12,state,0);
-        xp=state.at(0);yp=state.at(1);zp=state.at(2);
-        rp=sqrt(sqr(xp)+sqr(yp)+sqr(zp));rp3=cube(rp);
-        xxp=x-xp;yyp=y-yp;zzp=z-zp;
-        rrp=sqrt(sqr(xxp)+sqr(yyp)+sqr(zzp));rrp3=cube(rrp);rrp4=rrp3*rrp;
+//        Ephem_obj.JPL_ecliptic_m_get(julianstart+t/86400.0,3,12,state,0);
+//        xp=state.at(0);yp=state.at(1);zp=state.at(2);
+//        rp=sqrt(sqr(xp)+sqr(yp)+sqr(zp));rp3=cube(rp);
+//        xxp=x-xp;yyp=y-yp;zzp=z-zp;
+//        rrp=sqrt(sqr(xxp)+sqr(yyp)+sqr(zzp));rrp3=cube(rrp);rrp4=rrp3*rrp;
         /// MAX THRUST DETERMINATION
         if(params.NEP==1){
             T=params.kfactor;
@@ -91,16 +94,16 @@ Agent_datatype _3body_cost(sys_pars<Agent_datatype> &params,const std::vector<Ag
         accl=sqrt(sqr(ax)+sqr(ay)+sqr(az));
         /// STATE EQUATIONS
         dxdt.at(0)=vx;dxdt.at(1)=vy;dxdt.at(2)=vz;
-        dxdt.at(3)=-(mu_s*x/r3)-(mu_p*(xxp)/rrp3)+ax;
-        dxdt.at(4)=-(mu_s*y/r3)-(mu_p*(yyp)/rrp3)+ay;
-        dxdt.at(5)=-(mu_s*z/r3)-(mu_p*(zzp)/rrp3)+az;
+        dxdt.at(3)=-(mu_s*x/r3)/**-(mu_p*(xxp)/rrp3)**/+ax;
+        dxdt.at(4)=-(mu_s*y/r3)/**-(mu_p*(yyp)/rrp3)**/+ay;
+        dxdt.at(5)=-(mu_s*z/r3)/**-(mu_p*(zzp)/rrp3)**/+az;
         dxdt.at(6)=-m*accl/g0Isp;
         /// COSTATE EQUATIONS
         rx=x/r;ry=y/r;rz=z/r;
-        valx=((mu_s*x/r4)+(mu_p*xxp/rrp4));
-        valy=((mu_s*y/r4)+(mu_p*yyp/rrp4));
-        valz=((mu_s*z/r4)+(mu_p*zzp/rrp4));
-        muval=-(mu_s/r3)-(mu_p/rrp3);
+        valx=((mu_s*x/r4)/**+(mu_p*xxp/rrp4)**/);
+        valy=((mu_s*y/r4)/**+(mu_p*yyp/rrp4)**/);
+        valz=((mu_s*z/r4)/**+(mu_p*zzp/rrp4)**/);
+        muval=-(mu_s/r3)/**-(mu_p/rrp3)**/;
         dxdt.at(7)=-lvx*(muval+3.0*rx*valx)-lvy*(3.0*rx*valy)-lvz*(3.0*rx*valz);
         dxdt.at(8)=-lvx*(3.0*ry*valx)-lvy*(muval+3.0*ry*valy)-lvz*(3.0*ry*valz);
         dxdt.at(9)=-lvx*(3.0*rz*valx)-lvy*(3.0*rz*valy)-lvz*(muval+3.0*rz*valz);
@@ -135,7 +138,7 @@ Agent_datatype _3body_cost(sys_pars<Agent_datatype> &params,const std::vector<Ag
         else{
             ax=0.0;ay=0.0;az=0.0;
         }
-        if(m<0.025*mi||r<6578000.0){
+        if(m<0.025*mi||r<10000.0e+3){
             ax=0.0;ay=0.0;az=0.0;
         }
         accl=sqrt(sqr(ax)+sqr(ay)+sqr(az));
@@ -213,12 +216,13 @@ Agent_datatype _3body_cost(sys_pars<Agent_datatype> &params,const std::vector<Ag
     if(printval){
         write_cout(xfr1,xfr2,t);
     }
+    double l0=l;
     /// ///////////////////////////////////////////////////////////////////////////////
     /// INTEGRATION ROUTINE
     const double r_soi_sec=params.a_second*pow((mu_p/mu_s),0.4);
     const double switchpoint=r_soi_sec;
     const double deltaswitch=0.325*r_soi_sec;
-    double r2p;
+    double r2p,r2pmin=1e+25;
     int counter=0;
     double radfinal=params.rf_fac*params.rfinal;
     while(t+dt<endtime){
@@ -230,6 +234,7 @@ Agent_datatype _3body_cost(sys_pars<Agent_datatype> &params,const std::vector<Ag
         Ephem_obj.JPL_ecliptic_m_get(julianstart+t/86400.0,3,12,state,1);
         xp=state.at(0);yp=state.at(1);zp=state.at(2);vxp=state.at(3);vyp=state.at(4);vzp=state.at(5);
         r2p=sqrt(sqr(xfr2.at(0))+sqr(xfr2.at(1))+sqr(xfr2.at(2)));
+        r2pmin=(r2p<r2pmin)?r2p:r2pmin;
         if(r2p>=switchpoint){
             if(frameID==1){
                 xstate.at(0)+=xp;xstate.at(1)+=yp;xstate.at(2)+=zp;xstate.at(3)+=vxp;xstate.at(4)+=vyp;xstate.at(5)+=vzp;
@@ -268,6 +273,7 @@ Agent_datatype _3body_cost(sys_pars<Agent_datatype> &params,const std::vector<Ag
             write_cout(xfr1,xfr2,t);
         }
         dt=(dt>86400.0*params.maxstep)?86400.0*params.maxstep:dt;
+        dt=(r2p<10.0*r_soi_sec&&dt>1.0*8640.00*params.maxstep)?1.0*8640.00*params.maxstep:dt;
     }
     dt=endtime-t;
     if(frameID==0){
@@ -330,6 +336,7 @@ Agent_datatype _3body_cost(sys_pars<Agent_datatype> &params,const std::vector<Ag
     ex=((vyf*Hz-vzf*Hy)/mu)-(xf/rfc);
     ey=((vzf*Hx-vxf*Hz)/mu)-(yf/rfc);
     ez=((vxf*Hy-vyf*Hx)/mu)-(zf/rfc);
+    double incl=acos(Hz/Hfc);
     double cost_val=(sqr(1.0-af/a0));
     cost_val+=(sqr(Hxi/Hf-Hx/Hfc));
     cost_val+=(sqr(Hyi/Hf-Hy/Hfc));
@@ -337,9 +344,12 @@ Agent_datatype _3body_cost(sys_pars<Agent_datatype> &params,const std::vector<Ag
     cost_val+=(sqr(ex-exi));
     cost_val+=(sqr(ey-eyi));
     cost_val+=(sqr(ez-ezi));
+    cost_val+=sqr(incl-params.inclf)/pi;
     massfrac=1.0-xstate.at(6)/mi;
     cost_val+=(sqr(t-endtime));
-//    cost_val+=abs(frameID-params.endbody);
+    r2p=sqrt(sqr(xfr2.at(0))+sqr(xfr2.at(1))+sqr(xfr2.at(2)));
+    cost_val+=1e-6*r2p*abs(frameID-params.endbody);
+//    cost_val+=(r2pmin<6378e+3)?r2p:0.0;
     return cost_val;
 }
 /// ///////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,7 @@
 #include"agent_defn.hpp"
 #include"dataTYPE.hpp"
 #include"3bodyfunction.hpp"
+#include"FullTrajSoln.hpp"
 
 #include<cmath>
 #include<vector>
@@ -1120,6 +1121,12 @@ Agent_data Agent<Agent_data>::cost_fn_print(const int &selector)
     case 26:{
             ///3 body fuel optimal soln
             cost_val=_3body_cost(params,vals,true,massfrac);
+            break;
+        }
+    case 27:{
+            ///complete parking orbit to parking orbit transfer
+            ///ephemeris model type
+            cost_val=_fullSoln_cost(params,vals,true,massfrac);
             break;
         }
     default:{
