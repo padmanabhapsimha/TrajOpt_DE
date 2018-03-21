@@ -41,6 +41,8 @@ public:
     int endbody;///final central body
     int printframe;///frame to print in
     int maxstepcount;///maximum number of integration steps
+    Agent_data mu_m;///gravitational parameter of third major body
+    Agent_data a_third;///third body semi-major axis from overall central
 };
 /**< THIS CLASS IS USED FOR CONVENIENT HANDLING OF AGENTS */
 /**< CLASS IS TEMPLATED SO THAT EITHER FLOAT, DOUBLE, LONG DOUBLE ETC CAN BE CHOSEN */

@@ -29,7 +29,7 @@ OBJDIR_RELEASE = obj\\Release
 DEP_RELEASE = 
 OUT_RELEASE = bin\\Release\\Simple_DE.exe
 
-OBJ_RELEASE = $(OBJDIR_RELEASE)\\Wrapper_JPL_Ephem.o $(OBJDIR_RELEASE)\\params_reader.o $(OBJDIR_RELEASE)\\main.o $(OBJDIR_RELEASE)\\jpleph.o $(OBJDIR_RELEASE)\\de_solver.o $(OBJDIR_RELEASE)\\de_func.o $(OBJDIR_RELEASE)\\cost_fn_print.o $(OBJDIR_RELEASE)\\cost_fn.o $(OBJDIR_RELEASE)\\agent_defn.o $(OBJDIR_RELEASE)\\3bodyfunction.o
+OBJ_RELEASE = $(OBJDIR_RELEASE)\\params_reader.o $(OBJDIR_RELEASE)\\main.o $(OBJDIR_RELEASE)\\jpleph.o $(OBJDIR_RELEASE)\\de_solver.o $(OBJDIR_RELEASE)\\de_func.o $(OBJDIR_RELEASE)\\cost_fn_print.o $(OBJDIR_RELEASE)\\cost_fn.o $(OBJDIR_RELEASE)\\agent_defn.o $(OBJDIR_RELEASE)\\FullTrajSoln.o $(OBJDIR_RELEASE)\\3bodyfunction.o $(OBJDIR_RELEASE)\\Wrapper_JPL_Ephem.o
 
 all: release
 
@@ -69,6 +69,9 @@ $(OBJDIR_RELEASE)\\cost_fn.o: cost_fn.cpp
 
 $(OBJDIR_RELEASE)\\agent_defn.o: agent_defn.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c agent_defn.cpp -o $(OBJDIR_RELEASE)\\agent_defn.o
+
+$(OBJDIR_RELEASE)\\FullTrajSoln.o: FullTrajSoln.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c FullTrajSoln.cpp -o $(OBJDIR_RELEASE)\\FullTrajSoln.o
 
 $(OBJDIR_RELEASE)\\3bodyfunction.o: 3bodyfunction.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c 3bodyfunction.cpp -o $(OBJDIR_RELEASE)\\3bodyfunction.o

@@ -1,6 +1,7 @@
 #include"agent_defn.hpp"
 #include"dataTYPE.hpp"
 #include"3bodyfunction.hpp"
+#include"FullTrajSoln.hpp"
 #include<cmath>
 #include<vector>
 #include<boost/numeric/odeint.hpp>
@@ -619,7 +620,7 @@ Agent_data Agent<Agent_data>::cost_fn(const int &selector)
 //            cost_val=abs((ra-rc)/1000.0);
 //            double velx,vely,rex,rey;
 //            rex=x.at(0)/rc;rey=x.at(1)/rc;
-//            velx=-25.0*rex;vely=-25.0*rey;
+//            velx=-0.01*rex;vely=-0.01*rey;
 //            cost_val+=abs(x.at(2)-velx)+abs(x.at(3)-vely);
 
             break;
@@ -1190,11 +1191,21 @@ Agent_data Agent<Agent_data>::cost_fn(const int &selector)
             cost_val*=(cost_val<1e-2)?massfrac:1.0;
             ///UNCOMMENT BELOW LINE FOR PLANETARY ESCAPE
 //            cost_val=-(0.5*sqr(vfc)-mu/rfc)/1e8;
+
+
+
+
             break;
         }
     case 26:{
             ///3 body fuel optimal soln
             cost_val=_3body_cost(params,vals,false,massfrac);
+            break;
+        }
+    case 27:{
+            ///complete parking orbit to parking orbit transfer
+            ///ephemeris model type
+            cost_val=_fullSoln_cost(params,vals,false,massfrac);
             break;
         }
     default:{
