@@ -11,7 +11,7 @@ AR = ar.exe
 LD = g++.exe
 WINDRES = windres.exe
 
-INC = -I H:\\Boost\\boost_1_65_1
+INC = -I H:\\Boost\\boost_1_66_0
 CFLAGS = -w -fexceptions ${INC}
 RESINC = 
 LIBDIR = 
