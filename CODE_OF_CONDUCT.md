@@ -8,10 +8,10 @@ In the interest of fostering an open and welcoming environment, we as contributo
 
 Examples of behavior that contributes to creating a positive environment include:
 
-* By not being a pansy fruitcake who can't take a ribbing.
-* By not being a politically correct moron.
+* Not being a pansy fruitcake who can't take a ribbing.
+* Not being a politically correct moron.
 * Treating others how you'd expect them to treat you.
-* By watching the cult classic film, "Gunda" several times over.
+* Watching the cult classic film, "Gunda" several times over.
 
 Examples of unacceptable behavior by participants include:
 
