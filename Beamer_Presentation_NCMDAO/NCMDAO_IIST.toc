@@ -1,0 +1,5 @@
+\beamer@endinputifotherversion {3.36pt}
+\beamer@sectionintoc {1}{Problem Definition}{2}{0}{1}
+\beamer@sectionintoc {2}{Problem Formulation}{4}{0}{2}
+\beamer@sectionintoc {3}{Solution Procedure}{8}{0}{3}
+\beamer@sectionintoc {4}{Results}{9}{0}{4}
