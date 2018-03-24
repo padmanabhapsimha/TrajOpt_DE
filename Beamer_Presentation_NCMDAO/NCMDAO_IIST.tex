@@ -49,23 +49,31 @@ Indian Institute of Space Science and Technology \\ for\\ National Conference on
 %\section{Abstract} % Sections can be created in order to organize your presentation into discrete blocks, all sections and subsections are automatically printed in the table of contents as an overview of the talk
 %------------------------------------------------
 \section{Problem Definition}
+
 \begin{frame}
-	\frametitle{Interplanetary Transfers with Electrically Propelled Spacecraft}
+\frametitle{Interplanetary Transfers with Electrically Propelled Spacecraft}
+\begin{itemize}
+	\vspace{-3mm}
+	\item Electric propulsion offers a good option for interplanetary transfers.
+	\pause
+	\item Spacecraft in initial heliocentric orbit.
+	\pause
+	\item To rendezvous with a final heliocentric orbit under heliocentric gravitational dynamics.
+	\pause
+	\item Thrust vector magnitude and direction are the control variables that are to be determined to optimize:
 	\begin{itemize}
-		\vspace{-3mm}
-		\item Electric propulsion offers a good option for interplanetary transfers.
-		\item Spacecraft in initial heliocentric orbit.
-		\item To rendezvous with a final heliocentric orbit under heliocentric gravitational dynamics.
-		\item Thrust vector magnitude and direction are the control variables that are to be determined to optimize:
-		\begin{itemize}
-			\item Flight duration
-			\item Propellant consumption
-		\end{itemize}
-		\item Only gradual velocity changes are possible due to low thrust.
-		\item Coasting is to be allowed and should arise naturally out of the solution.
-		\item Indirect approach to optimal control has been followed to solve this problem.
+		\item Flight duration
+		\item Propellant consumption
 	\end{itemize}
+	\pause
+	\item Only gradual velocity changes are possible due to low thrust.
+	\pause
+	\item Coasting is to be allowed and should arise naturally out of the solution.
+	\pause
+	\item Indirect approach to optimal control has been followed to solve this problem.
+\end{itemize}
 \end{frame}
+
 
 \begin{frame}
 	\frametitle{Electric propulsion (EP) power-plant types considered}
@@ -243,7 +251,7 @@ It is observed that CR/F ratios greater than 1 are suitable for rapid convergenc
 	\begin{figure}
 		\centering\includegraphics[width=0.65\linewidth]{Imgs/Fuelfrac_isp.png}
 	\end{figure}
-Low acceleration levels results in spiral transfers which lead to similar fuel fractions.
+Very low acceleration levels result in spiral transfers. These transfers take similar fuel fractions.
 \end{frame}
 
 
@@ -259,6 +267,16 @@ Low acceleration levels results in spiral transfers which lead to similar fuel f
 	\begin{figure}
 		\centering\includegraphics[width=0.60\linewidth]{Imgs/FuelOptParam.png}
 	\end{figure}
+\end{frame}
+
+\begin{frame}
+\frametitle{Earth-Mars fuel optimal transfers - Power models}
+\vspace{-3.25mm}
+\begin{figure}
+	\centering\includegraphics[width=0.60\linewidth]{Imgs/Semimaj_axis.png}
+\end{figure}
+\vspace{-3.00mm}
+SEP models for a 200 day transfer show that solar power models tend to waste energy to satisfy the flight time constraint. This is due to reduced thrust at larger radii from the Sun.
 \end{frame}
 
 \begin{frame}
