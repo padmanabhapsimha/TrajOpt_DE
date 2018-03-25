@@ -48,7 +48,9 @@ public:
         JPLeph=inputobj.JPLeph;
     }///copy constructor
     void JPL_ecliptic_m_get(const double &epoch,const int &ntarg,const int &ncent,std::array<double,6> &state,
-                            const int &vCompute);
+                            const int &vCompute);///STATE VECTOR IN ECLIPTIC FRAME
+    void JPL_equatorial_m_get(const double &epoch,const int &ntarg,const int &ncent,std::array<double,6> &state,
+                            const int &vCompute);///STATE VECTOR IN EQUATORIAL FRAME
     ~wrappy_jpl(){
         jpl_close_ephemeris(JPLeph);
     }///destructor

@@ -26,3 +26,15 @@ void wrappy_jpl::JPL_ecliptic_m_get(const double &epoch,const int &ntarg,const i
         state.at(4)*=1731456.8368055555555555555555556;
         state.at(5)*=1731456.8368055555555555555555556;
 }
+
+void wrappy_jpl::JPL_equatorial_m_get(const double &epoch,const int &ntarg,const int &ncent,std::array<double,6> &state,
+                                    const int &vCompute)
+{
+        jpl_pleph(JPLeph,epoch,ntarg,ncent,state.begin(),vCompute);
+        state.at(0)*=149597870700.0;
+        state.at(1)*=149597870700.0;
+        state.at(2)*=149597870700.0;
+        state.at(3)*=1731456.8368055555555555555555556;
+        state.at(4)*=1731456.8368055555555555555555556;
+        state.at(5)*=1731456.8368055555555555555555556;
+}
