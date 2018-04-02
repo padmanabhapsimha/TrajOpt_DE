@@ -10,7 +10,8 @@
 template<typename Agent_data>
 void params_reader(unsigned int &generations,unsigned int &dimensions,unsigned int &agents,Agent_data &CR,Agent_data &F,
                    std::vector<Agent_data> &L,std::vector<Agent_data> &H,int &cost_select,unsigned int &threads_no,
-                   std::string filename,int &seedval)
+                   std::string filename,int &seedval,int &agtinit,std::string &agtinputfile,std::string &bestagtfile,
+                   int &rebound,std::vector<Agent_data> &newboundlimit)
 {
     std::fstream fin(filename,std::ios::in);
     Agent_data Ltemp,Htemp;
@@ -34,6 +35,13 @@ void params_reader(unsigned int &generations,unsigned int &dimensions,unsigned i
             }
         }
         fin>>cost_select>>threads_no>>seedval;
+        fin>>agtinit>>agtinputfile>>bestagtfile>>rebound;
+        if(rebound){
+            Agent_data tempval;
+            for(unsigned int i=0;i<dimensions;i++){
+                fin>>tempval;newboundlimit.push_back(tempval);
+            }
+        }
     }
     else
     {
@@ -47,4 +55,6 @@ void params_reader(unsigned int &generations,unsigned int &dimensions,unsigned i
 ///TEMPLATE FUNCTION INSTANTIATION
 template void params_reader(unsigned int &generations,unsigned int &dimensions,unsigned int &agents,Agent_datatype &CR,
                             Agent_datatype &F,std::vector<Agent_datatype> &L,std::vector<Agent_datatype> &H,
-                            int &cost_select,unsigned int &threads_no,std::string filename,int &seedval);
+                            int &cost_select,unsigned int &threads_no,std::string filename,int &seedval,
+                            int &agtinit,std::string &agtinputfile,std::string &bestagtfile,int &rebound,
+                            std::vector<Agent_datatype> &newboundlimit);

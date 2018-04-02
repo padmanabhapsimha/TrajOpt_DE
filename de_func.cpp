@@ -22,11 +22,13 @@ void de_function(string inputfile,string agentoutputfile,string bestagentfile,st
     ///DE PARAMS
     unsigned int gens,dim,agents_no=0;
     unsigned int threads_no;
-    int cost_select,seedval;
+    int cost_select,seedval,agtinit,rebound;
+    string agtinputfile,bestagtfile;
     Agent_datatype CR,F;
-    vector<Agent_datatype> L,H;
+    vector<Agent_datatype> L,H,newboundlimit;
     ///READ ALL THESE FROM FILE
-    params_reader(gens,dim,agents_no,CR,F,L,H,cost_select,threads_no,inputfile,seedval);
+    params_reader(gens,dim,agents_no,CR,F,L,H,cost_select,threads_no,inputfile,seedval,agtinit,agtinputfile,
+                  bestagtfile,rebound,newboundlimit);
     if(seedval<0){
         seedval=static_cast<unsigned int>(clock());
     }
@@ -56,9 +58,66 @@ void de_function(string inputfile,string agentoutputfile,string bestagentfile,st
         }
         allAgents.push_back(MyAgent(holder));
     }
+    ///REWRITE AGENTS WITH FILE INPUT IF DEEMED SO
+    double inputval;
+    int agtnumber;
+    fstream fileinput(agtinputfile,ios::in);
+    if(!fileinput.good()){
+        cout<<endl<<"Something bad has happened. Unable to open "<<agtinputfile<<endl;
+        exit(-1);
+    }
+    if(agtinit){
+        for(unsigned int i=0;i<agents_no;i++){
+            fileinput>>agtnumber;///junk data -- agent number
+            for(unsigned int j=0;j<dim;j++){
+                fileinput>>inputval;///useful data
+                allAgents.at(i).vals.at(j)=inputval;
+            }
+            fileinput>>inputval;///junk data -- agent cost value
+            allAgents.at(i).cost_val=inputval;
+        }
+    }
+    ///RECENTER BOUNDS IF NEEDED
+    fileinput.close();
+    fileinput.open(bestagtfile,ios::in);
+    if(!fileinput.good()){
+        cout<<endl<<"Something bad has happened. Unable to open "<<agtinputfile<<endl;
+        exit(-1);
+    }
+    if(agtinit){
+        for(unsigned int j=0;j<dim;j++){
+            fileinput>>inputval;///junk
+        }
+        for(unsigned int j=0;j<dim;j++){
+            fileinput>>inputval;///lower bounds
+            L.at(j)=inputval;
+        }
+        for(unsigned int j=0;j<dim;j++){
+            fileinput>>inputval;///upper bounds
+            H.at(j)=inputval;
+        }
+    }
+    fileinput.close();
+    fileinput.open(bestagtfile,ios::in);
+    if(rebound){
+        for(unsigned int i=0;i<dim;i++){
+            fileinput>>inputval;///useful data
+            L.at(i)=inputval-newboundlimit.at(i)*abs(inputval);
+            H.at(i)=inputval+newboundlimit.at(i)*abs(inputval);
+        }
+        ///reseed agents within bounds
+        for(unsigned int i=0;i<agents_no;i++){
+            holder.clear();
+            for(unsigned int j=0;j<dim;j++){
+                holder.push_back(L.at(j)+(H.at(j)-L.at(j))*randgen_real());
+            }
+            allAgents.at(i)=holder;
+        }
+    }
     ///INITIALIZE AGENTS WITH SYSTEM PARAMETERS
     for(unsigned int i=0;i<agents_no;i++){
         allAgents.at(i).params_init(sysparamsfile);
+        allAgents.at(i).cost_fn(cost_select);
     }
     /**< START OF DIFFERENTIAL EVOLUTION */
     mutex myMutex;
@@ -108,6 +167,14 @@ void de_function(string inputfile,string agentoutputfile,string bestagentfile,st
     for(unsigned int i=0;i<dim;i++){
         cout<<allAgents.at(optagtno).vals.at(i)<<"\t";
         optagtout<<allAgents.at(optagtno).vals.at(i)<<"\t";
+    }
+    optagtout<<endl;
+    for(unsigned int i=0;i<dim;i++){
+        optagtout<<L.at(i)<<"\t";
+    }
+    optagtout<<endl;
+    for(unsigned int i=0;i<dim;i++){
+        optagtout<<H.at(i)<<"\t";
     }
     allAgents.at(optagtno).cost_fn_print(cost_select);///PRINT OUTPUT IF ANY TO FILE
     /// /////////////////////////////////////////////////////
