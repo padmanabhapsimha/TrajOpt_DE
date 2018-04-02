@@ -12,6 +12,11 @@ Description of the input file for differential evolution code
 9>  Problem cost function type - details below
 10> Number of threads to use to solve problem
 11> Seed for random number generator
+12> Whether to read from agent input file (0 if no)
+13> Agent input file name
+14> Best agent file
+15> Resize bounds over best agent (0 if no)
+16> Fractional bound limits
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Selector string
 carry_toAll -> only provide 1 upper and lower bound and these are used over all dimensions
@@ -47,5 +52,6 @@ Problem cost function listing
 24 - 2D continuous thrusting r based integration termination min fuel
 25 - 3D continuous thrusting fuel optimal general code
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-26 - 3d continuous thrusting fuel optimal with frame switching (multiple bodies)
+26 - 3d SOI patched continuous thrusting fuel optimal with frame switching (2 central bodies)
+27 - 3d SOI patched continuous thrusting fuel optimal with frame switching (3 central bodies)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

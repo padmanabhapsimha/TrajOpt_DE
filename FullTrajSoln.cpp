@@ -21,7 +21,7 @@
 #include<boost/numeric/odeint.hpp>
 /// ///////////////////////////////////////////////////////////////////////////////
 namespace fileLocal_FullTrajSoln{
-    std::fstream fileout2("Output.txt",std::ios::out);
+    std::fstream fileout2("Output.txt",std::ios::out);///file handle auto closed due to RAII
     auto write_cout=[&](const auto &xfr1,const auto &xfr2,const auto &xfr3,const auto &xE,const auto &xM,const double &t)
     {
         fileout2.precision(17);
@@ -50,7 +50,7 @@ auto cube=[](const auto &x){return x*x*x;};
 typedef Agent_datatype state_type;
 ///RUNGE KUTTA SETUP
 using namespace boost::numeric::odeint;
-typedef runge_kutta_fehlberg78<std::vector<state_type>> switch_stepper;
+//typedef runge_kutta_fehlberg78<std::vector<state_type>> switch_stepper;
 typedef runge_kutta_fehlberg78<std::vector<state_type>> stepper_type;
 /// ///////////////////////////////////////////////////////////////////////////////
 const double pi=3.1415926535897932384626433832795028;
@@ -61,15 +61,15 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
     using namespace fileLocal_FullTrajSoln;
     /// ///////////////////////////////////////////////////////////////////////////////
     /// CONTROLLED STEPPERS
-    auto controlled_switch_stepper=make_controlled(params.integ_tol,params.integ_tol,0.5*params.maxstep*86400.0,switch_stepper());
+//    auto controlled_switch_stepper=make_controlled(params.integ_tol,params.integ_tol,0.5*params.maxstep*86400.0,switch_stepper());
     auto controlled_stepper=make_controlled(params.integ_tol,params.integ_tol,params.maxstep*86400.0,stepper_type());
     /// ///////////////////////////////////////////////////////////////////////////////
     wrappy_jpl Ephem_obj(params.ephem_file);///ephemeris object
     std::array<double,6> state_e,state_m;///of moving frame
     /// PARAMETERS AND VARIABLES
-    const double rsol=(params.startbody==0)?params.rinit:params.rfinal;
+    const double rsol=params.a_second;
     const double mi=params.mi;
-    const double julianstart=vals.at(8);
+    double julianstart=vals.at(8);
     double mu_s=params.mu;
     double mu_p=params.mu_e;///or params.mu_m;
     double g0Isp=params.g0*params.Isp;
@@ -152,7 +152,12 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
             T=params.kfactor;
         }
         else{
-            T=params.kfactor*sqr(rsol/r);
+            if(mu_p==params.mu_e){
+                T=params.kfactor*sqr(rsol)/(sqr(x+xp_e)+sqr(y+yp_e)+sqr(z+zp_e));
+            }
+            else if(mu_p==params.mu_m){
+                T=params.kfactor*sqr(rsol)/(sqr(x+xp_m)+sqr(y+yp_m)+sqr(z+zp_m));
+            }
         }
         /// CONTROL LAW
         costsqrt=sqrt(sqr(lvx)+sqr(lvy)+sqr(lvz));
@@ -232,6 +237,9 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
     /// ///////////////////////////////////////////////////////////////////////////////
     double endtime=vals.at(7)*86400.0;
     double t=0.0,dt=1e-3;
+    const double r_soi_sec=params.a_second*pow((params.mu_e/mu_s),0.4);
+    const double r_soi_thr=params.a_third*pow((params.mu_m/mu_s),0.4);
+    double r2p_e,r2p_m,r2p_e_min,r2p_m_min;
     /// ///////////////////////////////////////////////////////////////////////////////
     Ephem_obj.JPL_ecliptic_m_get(julianstart,3,12,state_e,1);
     xp_e=state_e.at(0);yp_e=state_e.at(1);zp_e=state_e.at(2);vxp_e=state_e.at(3);vyp_e=state_e.at(4);vzp_e=state_e.at(5);
@@ -263,9 +271,6 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
     }
     /// ///////////////////////////////////////////////////////////////////////////////
     /// INTEGRATION ROUTINE
-    const double r_soi_sec=params.a_second*pow((params.mu_e/mu_s),0.4);
-    const double r_soi_thr=params.a_third*pow((params.mu_m/mu_s),0.4);
-    double r2p_e,r2p_m,r2p_e_min,r2p_m_min;
     int counter=0;
     ///PLANET CENTRIC DISTANCES
     r2p_e=sqrt(sqr(xfr2.at(0))+sqr(xfr2.at(1))+sqr(xfr2.at(2)));
@@ -329,7 +334,9 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
         }
         else{
             ///SHOULD NOT BE POSSIBLE
-            std::cout<<std::endl<<"This should not happen during integration"<<std::endl;
+            ///BUT I HAVE SEEN IT HAPPEN WITH R2P VALUE GOING TO NAN
+            ///FOR SOME WEIRD INPUT CASE THAT I DON'T UNDERSTAND SQUAT ABOUT
+            std::cout<<std::endl<<"This should not happen during integration "<<r2p_e<<"\t"<<r2p_m<<std::endl;
         }
         if(printval){///PRINT TO FILE IF SPECIFIED
             write_cout(xfr1,xfr2,xfr3,state_e,state_m,t);
@@ -340,9 +347,10 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
         r2p_e_min=(r2p_e<r2p_e_min)?r2p_e:r2p_e_min;
         r2p_m_min=(r2p_m<r2p_m_min)?r2p_m:r2p_m_min;
         dt=(dt>86400.0*params.maxstep)?86400.0*params.maxstep:dt;
-        dt=((r2p_e<=2.5*r_soi_sec||r2p_m<5.0*r_soi_thr)&&dt>8640.0*params.maxstep)?8640.0*params.maxstep:dt;
+        dt=((r2p_e<=3.75*r_soi_sec||r2p_m<7.5*r_soi_thr)&&dt>8640.0*params.maxstep)?8640.0*params.maxstep:dt;
     }
     dt=endtime-t;
+    double dtlast=dt;
     if(frameID==0){
         xstate=xfr1;
         controlled_stepper.try_step(rhs_helio,xstate,t,dt);
@@ -448,8 +456,9 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
     cost_val+=(sqr(ez-ezi));
     cost_val+=sqr(incl-params.inclf)/pi;
     massfrac=1.0-xstate.at(6)/mi;
-    cost_val+=(sqr(t-endtime));
     double r2p=sqrt(sqr(xstate.at(0))+sqr(xstate.at(1))+sqr(xstate.at(2)));
+    double v2p=sqrt(sqr(xstate.at(3))+sqr(xstate.at(4))+sqr(xstate.at(5)));
+    double energy=0.5*sqr(v2p)-mu/r2p;
     if(params.endbody==1){
         Ephem_obj.JPL_ecliptic_m_get(julianstart+endtime/86400.0,3,12,state_e,1);
         xp_m=state_e.at(0);yp_m=state_e.at(1);zp_m=state_e.at(2);vxp_m=state_e.at(3);vyp_m=state_e.at(4);vzp_m=state_e.at(5);
@@ -458,19 +467,25 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
         Ephem_obj.JPL_ecliptic_m_get(julianstart+endtime/86400.0,4,12,state_m,1);
         xp_m=state_m.at(0);yp_m=state_m.at(1);zp_m=state_m.at(2);vxp_m=state_m.at(3);vyp_m=state_m.at(4);vzp_m=state_m.at(5);
     }
-//    r2p/=sqrt(sqr(xp_m)+sqr(yp_m)+sqr(zp_m));
+    r2p/=sqrt(sqr(xp_m)+sqr(yp_m)+sqr(zp_m));
     double cost_val2=(sqr(xfr1.at(0)-xp_m)+sqr(xfr1.at(1)-yp_m)+sqr(xfr1.at(2)-zp_m))/(sqr(xp_m)+sqr(yp_m)+sqr(zp_m));
     cost_val2+=(sqr(xfr1.at(3)-vxp_m)+sqr(xfr1.at(4)-vyp_m)+sqr(xfr1.at(5)-vzp_m))/(sqr(vxp_m)+sqr(vyp_m)+sqr(vzp_m));
     double retval;
     if(frameID!=params.endbody){
-        retval=(1.0+cost_val2)*1e+8;
+        retval=(1.0+cost_val2)*(1e+8);
     }
     else{
         retval=cost_val;
     }
-//    if(r2p_e_min<6578e+3||r2p_m_min<3594e+3){
-//        retval*=1e3;
+//    if(frameID==params.startbody&&params.startbody!=params.endbody&&params.startbody!=0){
+//        retval=1e8*(1.0+abs(energy));
 //    }
+    if(params.parking_transfer==0){
+        retval=cost_val2;
+    }
+    if(abs(dtlast)>params.maxstep*86400.0){
+        retval+=(sqr(dtlast));
+    }
     return retval;
 }
 /// ///////////////////////////////////////////////////////////////////////////////

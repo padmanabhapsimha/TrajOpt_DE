@@ -870,6 +870,15 @@ Agent_data Agent<Agent_data>::cost_fn(const int &selector)
 
             massfrac=(mi-x.at(4))/mi;
             cost_val*=(cost_val<1e-2)?massfrac:1.0;
+
+///opt landing
+//            cost_val=abs((ra-rc)/1000.0);
+//            double velx,vely,rex,rey;
+//            rex=x.at(0)/rc;rey=x.at(1)/rc;
+//            velx=-0.01*rex;vely=-0.01*rey;
+//            cost_val+=abs(x.at(2)-velx)+abs(x.at(3)-vely);
+
+
             break;
         }
     case 24:{
@@ -1192,6 +1201,12 @@ Agent_data Agent<Agent_data>::cost_fn(const int &selector)
             ///UNCOMMENT BELOW LINE FOR PLANETARY ESCAPE
 //            cost_val=-(0.5*sqr(vfc)-mu/rfc)/1e8;
 
+///optimal landing
+            cost_val=abs((rpf-rfc)/1000.0);
+            double velx,vely,rex,rey;
+            rex=x.at(0)/rfc;rey=x.at(1)/rfc;
+            velx=-0.01*rex;vely=-0.01*rey;
+            cost_val+=abs(x.at(3)-velx)+abs(x.at(4)-vely);
 
 
 

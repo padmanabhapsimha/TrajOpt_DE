@@ -43,6 +43,8 @@ public:
     int maxstepcount;///maximum number of integration steps
     Agent_data mu_m;///gravitational parameter of third major body
     Agent_data a_third;///third body semi-major axis from overall central
+    int parking_transfer;///rendezvous with planet orbit or transfer to parking orbit
+    int finaliz_rendez;///perform final orbit corrections to planetary rendezvous
 };
 /**< THIS CLASS IS USED FOR CONVENIENT HANDLING OF AGENTS */
 /**< CLASS IS TEMPLATED SO THAT EITHER FLOAT, DOUBLE, LONG DOUBLE ETC CAN BE CHOSEN */
