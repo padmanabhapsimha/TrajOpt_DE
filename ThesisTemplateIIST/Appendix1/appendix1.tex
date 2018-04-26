@@ -1,0 +1,94 @@
+% ******************************* Thesis Appendix A ****************************
+\chapter{Differential Evolution for Low Thrust Trajectory Optimization} 
+\label{AppendixA}
+\ifpdf
+\graphicspath{{Appendix1/}{Appendix1/}{Appendix1/}}
+\else
+\graphicspath{{Appendix1/}{Appendix1/}}
+\fi
+\section{Introduction to Differential Evolution}
+\cite{storn_differential_1997} in their seminal paper introduce a new heuristic search based global optimization method which they term as differential evolution. It was demonstrated to outperform several existing algorithms including adaptive simulated annealing. It is considered to be a subset of the broad genetic algorithm class of methods. Due to it’s real valued representation, it has inherent advantages when dealing with continuous optimization problems as will arrive from low thrust transfer problems. Gradient information is not required and also, this technique works well for problems with high dimensionality. 
+
+\section{Basic DE Algorithm}
+Let $f$ be a function from ${\rm I\!R}^{n}$ to ${\rm I\!R}^{1}$. No conditions are imposed on the smoothness of this function. Elements of the domain of this function are termed as population members and elements of the range are denoted as cost value corresponding to the population member. This function is called the cost function which we want to minimize based on several additional inequality and equality constraints on the agents. The constrained optimization problem can be converted into an unconstrained problem through the use of techniques like penalty functions. Thus the same minimization algorithm developed for unconstrained problems can be utilized. It is also possible to make use of the concept of pareto-optimality while dealing with multi-objective problems.\\
+
+The algorithm is as follows,
+\begin{itemize}
+	\item For every population member \textbf{x},
+	\begin{itemize}
+		\item Pick 3 mutually distinct random population members \textbf{a}, \textbf{b} and \textbf{c} which are also distinct from \textbf{x}.
+		\item Pick a random integer from $1$ to the $n$ where $n$ is the dimensionality of the problem being solved.
+		\item For each $i$ from $1$ to $n$, compute a new potential population member \textbf{y} as follows.
+		\begin{itemize}
+			\item Pick a uniformly distributed $r_i$ from $0$ to $1$.
+			\item If $r_i<CR$ or $i=R$, then set $y_i=a_i+F(b_i-c_i)$ 
+			\item Else set $y_i=x_i$.
+		\end{itemize}
+		\item If $f(\textbf{y})<f(\textbf{x})$, replace \textbf{x} with \textbf{y}.
+	\end{itemize}
+	\item Iterate over all the population members to complete $1$ generation.
+	\item Iterate till the required number of generations or until the cost function of the best agent goes below a set value.
+	\item Return the population member with the minimum cost as the best solution.
+\end{itemize}
+
+\nomenclature[z-CR]{CR}{DE Crossover Probability}
+\nomenclature[z-NP]{NP}{Number of Population Members for DE}
+\nomenclature[z-F]{F}{DE Mutation Factor}
+
+\section{Parallelization of DE algorithm}
+In order to enable the determination of solutions to large sized problems, it becomes necessary to allow for the numerical methods to use extensive amounts of computer hardware. Most desktop computers as of today are equipped with at least a dual core CPU. This means that two tasks or threads can concurrently run on the same machine at any given point of time. Conventional programming techniques allow for the generation of only one thread that can run when an executable/binary file is made to run. Special language dependent programming constructs are available to perform parallel computing. The two main types of parallelization are based on the hardware architecture. They are namely,
+\begin{itemize}
+	\item Shared memory architecture
+	\item Distributed memory architecture
+\end{itemize}
+\nomenclature[z-CPU]{CPU}{Central Processing Unit}
+
+Most desktops and workstations are of the shared memory parallel architecture. It involves a multiple core processor or multiple processors all sharing the same memory space. This means that all the data is available in one location and different cores can perform the specified instructions concurrently on the data or on different partitions of the data.\\
+On the other hand, high performance clusters and supercomputers are of the distributed memory parallel architecture. They involve multiple nodes which are networked together by fast interconnect topologies. Each node can posses multiple processors and memory units which is shared by the processors internal to the node. In these architectures, the data is distributed in different locations and each node can usually operate only on the data it possess. To access non-local data, significant time is required to send, process and receive data from other nodes. Nonetheless, this type of architecture is massively scalable and the fastest supercomputers in the world currently are based on this computing architecture.\\
+For the present study, DE has been parallelized in the shared memory architecture.
+\subsection{Parallelizing DE in shared memory architecture}
+This can be achieved with very high efficiency by decomposing the population members into individual groups that computer cores can work on. Each core only iterates over the batch of population members assigned to it. There are locks in place to prevent conflicts between different cores trying to overwrite data which is being used by other cores. Since all the cores can access the entire population, there are no communication requirements to perform the mutation operation. This has been implemented in standard C++17 and the efficiency of parallelization has been noted in 2, 4 and 8 core machines.  
+
+\begin{table}[H]
+	\centering
+	\caption{DE performance in a dual core 2.6GHz machine.}
+	\label{dePerf}
+	\resizebox{\columnwidth}{!}{%
+		\begin{tabular}{ccccccc}
+			\toprule
+			\multicolumn{3}{c}{25 dimensional Rastrigin function}  & 1 thread & 2 threads & 4 threads                                                                        &              \\ 
+			Lower bounds & Upper bounds            & Generations     & Time(ms) & Time(ms)  & Time(ms)                                                                         & Max Speedup  \\ \midrule
+			-1           & 1                       & 1000            & 857.626  & 546.38    & 379.27                                                                           & 2.26  \\ 
+			-10          & 10                      & 1750            & 1460.03  & 934.662   & 621.439                                                                          & 2.35  \\ 
+			-100         & 100                     & 1950            & 1613.14  & 1021.72   & 682.483                                                                          & 2.36  \\ 
+			-1000        & 1000                    & 2125            & 1764.25  & 1088.09   & 751.529                                                                          & 2.35  \\ 
+			-10000       & 10000                   & 2350            & 1954.39  & 1202.36   & 816.597                                                                          & 2.39  \\ \midrule
+			& Solution                & (0,0, . . . ,0) &          &           &                                                                                  &              \\ \bottomrule
+		\end{tabular}%
+	}
+\end{table}
+Individual steps of DE do not involve any sort of sorting or other global reconfigurations of the data which tend to be inherently sequential. This leads to very high parallelization efficiency based on Amdahl's law. Super-linear speedup has been consistently observed in some of the machines due to efficient cache behavior. Typically, it is advisable to load about 2 to 5 threads per core available. This is to eliminate the possibility of a core finishing all the tasks assigned and idling. Increasing the number of threads beyond a certain limit will have diminishing returns and beyond that, there will be performance loss due to thread creation overhead and switching between the threads. Consistent speedup has been observed for all problems attempted. Table \ref{dePerf} presents the results for the solution to a 25 dimensional Rastrigin function. This function has several local minima and the high dimensionality makes this a very difficult problem to handle. Nonetheless, DE has proven itself to reliably obtain the global optimum for every set of bounds on the search domain. Other such examples can be found in the book by \cite{price_differential_2005}.
+
+\subsection{Parallelizing DE in distributed memory architecture}
+Implementing DE in this architecture can be performed using multiple strategies, a few of which are as follows,
+\begin{itemize}
+	\item Decomposition of population
+	\item Decomposition of the search domain
+	\item Distributing the evaluation of the cost function
+\end{itemize}
+
+Decomposition of the population will lead to severe communication requirements at every generation step. This will reduce the parallelization efficiency. Decomposing the search domain has advantages but in the field of trajectory optimization, all sub-domains may not need similar computational times for cost function evaluation. This can lead to severe load balancing and can lead to inefficiencies.\\
+The third approach of distributing the evaluation of the cost function has merit when each cost function evaluation is computationally very expensive. The evolutionary algorithm is made to run on the head node while the cost function evaluations are offloaded to the alternative nodes as well as the head node. This has a fixed latency per generation and is scalable. Balancing the loads is much simpler with this mode of parallelization. It is possible to achieve this parallelization using frameworks like MPI (Message Passing Interface)\\
+It is the opinion of the author that the effort spent in parallelizing DE in a distributed architecture will not pay off unless the cost function evaluations are a severe bottleneck for the optimization. 
+
+\subsection{Parallelizing DE in a graphics processing unit}
+If the cost function evaluations involve solutions to extremely large systems of equations that arise from partial differential equations or extremely large systems of ordinary differential equations in the case of direct summation n-body simulations with large n, it may be beneficial to offload the cost function evaluation to a highly parallel single input multiple data (SIMD) processor like graphics processing units. These can be achieved through means of CUDA or OpenCL. Benchmarking double precision floating point arithmetic on a dual core Intel i7 4510U 2.6GHz processor vs a low end Nvidia GeForce 840M mobile graphics processor with 384 CUDA cores reveals that with appropriate tasks, a maximum speedup of 30 is possible with the graphics processing unit versus the CPU.
+
+\section{Parameter tuning for low thrust trajectory optimization}
+Figure \ref{DE_params} shows  the convergence pattern for a 200 day fuel optimal transfer from 1AU to 1.524AU orbits with an initial acceleration of $1mm/s^2$ and 2000s $I_{sp}$.
+\begin{figure}[H]
+	\centering\includegraphics[width=0.90\linewidth]{DE_convgc_new.eps}
+	\caption{DE performance and convergence pattern.}
+	\label{DE_params}
+\end{figure}
+It has been observed that CR/F ratios greater than unity lead to rapid convergence. Also, NP is set to at around 5 to 10 times the number of search variables. Beyond a certain number of generations, DE is found to saturate and not converge further, increasing NP alleviates this issue. Based on this plot, CR/F value chosen for all simulations is 0.9/0.8.  

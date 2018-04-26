@@ -1,0 +1,366 @@
+\chapter{Problem Formulation}
+
+% **************************** Define Graphics Path **************************
+\ifpdf
+    \graphicspath{{Chapter3/Figs/Raster/}{Chapter3/Figs/PDF/}{Chapter3/Figs/}}
+\else
+    \graphicspath{{Chapter3/Figs/Vector/}{Chapter3/Figs/}}
+\fi
+
+This chapter will present the state dynamics of the spacecraft under the following force models (i) single central body (ii) multiple gravitating bodies along with the thrust. The significance of the equations will be explained along with the relative contributions of each term to the dynamics of the spacecraft. The state and costate dynamics will be derived along with the formulation of the optimal control law. The solution procedure will also be explained.
+
+\section{Spacecraft dynamics with a single central body}
+\begin{align}
+	\dot{x}&=v_x\\
+	\dot{y}&=v_y\\
+	\dot{z}&=v_z\\
+	\dot{v}_x&=-\mu_c\frac{x}{r^3}+\alpha_x\\
+	\dot{v}_y&=-\mu_c\frac{y}{r^3}+\alpha_y\\
+	\dot{v}_z&=-\mu_c\frac{z}{r^3}+\alpha_z\\
+	\dot{m}&=-\frac{m}{g_0 I_{sp}}\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}
+\end{align}
+
+\nomenclature[s-x]{x}{x coordinate direction}
+\nomenclature[s-y]{y}{y coordinate direction}
+\nomenclature[s-z]{z}{z coordinate direction}
+\nomenclature[s-c]{c}{central body}
+\nomenclature[g-mu]{$\mu$}{gravitational parameter}
+\nomenclature[f-m]{m}{spacecraft instantaneous mass}
+\nomenclature[f-r]{$r$}{spacecraft radial distance from origin}
+\nomenclature[f-v]{$v$}{spacecraft velocity seen from origin}
+\nomenclature[g-alpha]{$\vec{\alpha}$}{acceleration vector due to thrust}
+\nomenclature[f-Isp]{$I_{sp}$}{thruster specific impulse}
+\nomenclature[f-g0]{$g_0$}{gravitational acceleration of Earth at sea level}
+
+
+The equations in sections 3.1 and 3.2 are the full three dimensional equations of motion. They can be converted to two dimensional equations by dropping the terms and equations corresponding to the out of plane component.
+
+Equations 3.1-3.6 represent the Newton's law of motion for a spacecraft under the influence of a single central body and a thrust force. The three second order equations of motion are represented as six first order coupled differential equations. Equation 3.7 governs the variation of the mass of the spacecraft based on the thrust and specific impulse levels. This set of equations can be used in heliocentric or planetocentric dynamics for both the fuel and time optimal problems. 
+
+\section{Spacecraft dynamics with two gravitating bodies}
+This is required in planetocentric phases where the influence of the sun is to be accounted for. The equations of motion also include the non inertial effect due to the acceleration of the planet around the sun. The origin of this coordinate system is at the center of the planet. It is assumed that the sun's position is known as a function of time with respect to this origin. This formulation allows for ephemeris data to be directly used in the solution.
+\begin{align}
+	\dot{x}&=v_x\\
+	\dot{y}&=v_y\\
+	\dot{z}&=v_z\\
+	\dot{v}_x&=-\mu_p\frac{x}{r^3}+\mu_s\bigg[-\frac{x_s}{r_s^3}-\frac{x-x_s}{(r-r_s)^3}\bigg]+\alpha_x\\
+	\dot{v}_y&=-\mu_p\frac{y}{r^3}+\mu_s\bigg[-\frac{y_s}{r_s^3}-\frac{y-y_s}{(r-r_s)^3}\bigg]+\alpha_y\\
+	\dot{v}_z&=-\mu_p\frac{z}{r^3}+\mu_s\bigg[-\frac{z_s}{r_s^3}-\frac{z-z_s}{(r-r_s)^3}\bigg]+\alpha_z\\
+	\dot{m}&=-\frac{m}{g_0 I_{sp}}\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}
+\end{align}
+\nomenclature[s-p]{p}{planet}
+\nomenclature[s-s]{s}{sun}
+
+The first term in the square brackets is the acceleration of the frame of reference (i.e planet) under two body assumptions. This constitutes a non inertial force. The second term represents the perturbing force due to the Sun's gravity field on the spacecraft. These equations can be derived by formulating the Newton's laws in the heliocentric (inertial) reference frame and then performing a coordinate transformation to the desired planet's frame. This brings in a term in the spacecraft's dynamics which corresponds to the planet's acceleration around the sun. This term is not known a priori. The planet's mass is assumed to be much smaller than that of the sun and two body dynamics is invoked to give the required acceleration. This is an approximation, albeit a good one for Earth-Moon, Earth-Sun and Mars-Sun systems. This constitutes a so called pseudo-force on the spacecraft. This force is typically three orders of magnitude lesser than the primary gravitational force of the planet when the spacecraft is in a planetary parking orbit.
+
+\section{Formulation of the optimal control problem}
+Transferring a spacecraft from one orbit to another requires the determination of $\alpha_x$, $\alpha_y$ and $\alpha_z$ at each instant of time such that the final conditions are satisfied. Besides this, it is required to perform the maneuver such that either the flight duration or the fuel consumption is minimized (the choice of which depends on other mission parameters).
+\subsection{Cost functions}
+\subsubsection{Time optimal cost function}
+\begin{align}
+	J_{time}=\Phi_f+\int\limits_{t_0}^{t_f}(1)dt
+\end{align}
+\nomenclature[s-Jtime]{$J_{time}$}{time optimal cost function}
+
+Evaluation of this integral gives the flight duration of the trajectory. This has to be minimized in the time optimal formulation. Here, the upper limit of the integration is an unknown.
+\subsubsection{Fuel optimal cost function}
+\begin{align}
+	J_{fuel}=\Phi_f+\int\limits_{t_0}^{t_f}\frac{m}{g_0 I_{sp}}\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}dt
+\end{align}
+\nomenclature[s-Jfuel]{$J_{fuel}$}{fuel optimal cost function}
+
+In this case, the final time is kept fixed to a value greater than or equal to the time optimal flight duration with initial time set as zero. There are no fuel optimal solutions for flight durations lesser than the time optimal value. For flight durations greater than the optimal time, it is expected that the fuel fraction needed to perform the maneuver is less than the time optimal value. This is achieved through periods of coasts which lead to a net lower fuel consumption. 
+\subsubsection{Terminal cost function ($\Phi_f$)}
+The error in the achievement of the final orbit conditions has to be driven down to zero for the purpose of mission design. This has to be minimized using a suitable optimization routine. This error is represented by $\Phi_f$ and it can be expanded as follows,
+\begin{align}
+	\Phi_f=|1-\frac{a_{achieved}}{a_{desired}}|^2+|\hat{h}_{achieved}-\hat{h}_{desired}|^2+|\vec{e}_{achieved}-\vec{e}_{desired}|^2
+\end{align}
+\nomenclature[g-Phi]{$\Phi$}{terminal cost function}
+\nomenclature[f-a]{$a$}{semi-major axis with respect to the corresponding central body}
+\nomenclature[f-hvec]{$\vec{h}$}{angular momentum vector with corresponding central body}
+\nomenclature[f-evec]{$\vec{e}$}{eccentricity vector with corresponding central body}
+This cost function does not impose any requirements on the final true anomaly of the spacecraft and any point on the final orbit can be the terminal point. 
+This function is handled separately from the second portion of the cost function which is handled through the theory of optimal control. The cost function presented here is singular at $|\vec{e}|=1$ (i.e parabolic orbit). This function is well behaved for all other values of orbital elements. It is possible to develop alternative versions of this cost function depending on the requirements of the mission. For example, if a certain point in space is to be targeted, it is possible to use the state vector of the desired point directly as the cost function. This state vector based cost function is used to initially guide the differential evolution algorithm to a planetary or lunar rendezvous in the case of transfers between planetary parking orbits or the Earth-Moon transfers respectively. The state vector targeting terminal cost function can be expressed as follows,
+\begin{align}
+	\Phi_f=|\vec{r}_{final}-\vec{r}_{desired}|^2+|\vec{v}_{final}-\vec{v}_{desired}|^2
+\end{align}
+\subsection{Transformation of Cartesian state vector to semi-major axis, angular momentum and eccentricity vectors}
+Since evaluating the function $\Phi_f$ requires the angular momentum and eccentricity vectors while the Cartesian state vector formulation is used, it becomes necessary to perform the following conversions,
+\begin{align}
+	a&=\frac{1}{\frac{2}{r}-\frac{v^2}{\mu_c}}\\
+	\vec{h}&=\vec{r}\times\vec{\dot{r}}\\
+	\vec{e}&=\frac{\vec{\dot{r}}\times\vec{h}}{\mu_c}-\frac{\vec{r}}{|\vec{r}|}
+\end{align}
+These are derived from the solution of the two body problem. This is valid as the final desired orbit is defined with it's two body orbital elements.
+\subsection{Transforming Keplerian orbital elements to state vector}
+The initial position of the spacecraft is specified in terms of the two body Keplerian orbital elements about a central body. This makes it essential to convert these into an initial state vector which can then be propagated. The conversion is performed as follows,
+\begin{align}
+	h&=\sqrt{\mu_c a (1-e^2)}\\
+	p&=a(1-e^2)\\
+	x&=r(\text{cos}\Omega \text{ cos}(\omega+\nu))-\text{sin}\Omega \text{ sin}(\omega+\nu)\text{ cos}i\\
+	y&=r(\text{sin}\Omega \text{ cos}(\omega+\nu))+\text{cos}\Omega \text{ sin}(\omega+\nu)\text{ cos}i\\
+	z&=r(\text{sin}i \text{ sin}(\omega+\nu))\\
+	\dot{x}&=\frac{xhe}{rp}\text{sin}\nu-\frac{h}{r}(\text{cos}\Omega\text{ sin}(\omega+\nu)+\text{sin}\Omega \text{ cos}(\omega+\nu)\text{ cos}i)\\
+	\dot{y}&=\frac{yhe}{rp}\text{sin}\nu-\frac{h}{r}(\text{sin}\Omega\text{ sin}(\omega+\nu)+\text{cos}\Omega \text{ cos}(\omega+\nu)\text{ cos}i)\\
+	\dot{z}&=\frac{zhe}{rp}\text{sin}\nu+\frac{h}{r}\text{sin}i\text{ cos}(\omega+\nu)
+\end{align}
+\nomenclature[g-Omga]{$\Omega$}{right ascension of ascending node}
+\nomenclature[g-omga]{$\omega$}{argument of periapsis}
+\nomenclature[g-i]{$i$}{orbital inclination}
+\nomenclature[g-nu]{$\nu$}{true anomaly}
+\nomenclature[f-p]{$p$}{semilatus rectum}
+These transformations are singular for the case of $e=1$. This implies that the initial orbit cannot be parabolic if this transformation is to be used. Hyperbolic orbits do not lead to issues with this formulation as $a$ is less than zero. For all other values of orbital elements with elliptic orbits, there are no singularities encountered.
+
+\section{Constraints on the controls}
+The following variables $\alpha_x$, $\alpha_y$ and $\alpha_z$ do not have governing differential equations of their own. Due to this, they are termed as control variables which can be externally varied. Different profiles of these controls lead to various trajectories. The control profiles have to be fixed based on the constraints due to the propulsion system and the type of problem being attempted. These constraints are to be enforced at the time of derivation of the optimal control law. They cannot be imposed after the determination of the controls from an unconstrained analysis. Thus it becomes important to know all the constraints beforehand.
+\subsection{Constraint on time optimal control}
+\begin{align}
+	m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}&=T_{max}
+\end{align}
+This implies that in the case of the time optimal formulation, it is implicitly assumed that the thruster is to operate at full power all the time as the total magnitude of the thrust is fixed at the maximum available thrust. The direction is the only quantity that has to be determined from further analysis. It is possible to replace the strict equality with a lesser than or equal inequality. From time optimal control analysis, it is possible to prove that the optimal trajectory will occur with the thrust set to the maximum level.
+\subsection{Constraint on fuel optimal control}
+\begin{align}
+	0\leq m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}\leq T_{max}
+\end{align}
+\nomenclature[f-T]{$T$}{thrust level}
+In the case of fuel optimal formulation, the thruster is allowed to utilize the full range of throttle available to it. Further optimal control analysis may reveal a bang-bang type of control where only zero and full throttle levels are required. In energy optimal formulations, it is possible that intermediate throttles can arise from the optimal control formulation.
+
+\section{Two point boundary value problem formulation}
+Based on the previous discussion, it is now evident that an optimal control problem has to be solved in order to obtain optimal low thrust spacecraft trajectories. There are two approaches to deal with these problems.
+\subsection{Direct approach to optimal control}
+The optimal control problem is transformed into a nonlinear programming problem. The flight duration which is described by the independent time variable is discretized and the controls are kept as optimization variables at each point. It is the function of the optimization routine to determine the controls at each discretization point (or coefficients of a fitting function assumed) that drives the terminal cost function to zero along with minimizing the flight duration or the fuel expenditure. This method has been successful in optimizing low thrust spacecraft trajectories.
+\nomenclature[z-NLP]{NLP}{Nonlinear Programming Problem}
+\subsubsection{Merits of direct optimal control}
+\begin{itemize}
+	\item Conceptually straightforward.
+	\item Ease of implementation.
+	\item Physical interpretation of the optimization variables is apparent.
+	\item Does not need smooth functions for externally available system data (i.e tabulated results can be made use of directly).
+\end{itemize}
+\subsubsection{Demerits of direct optimal control}
+\begin{itemize}
+	\item Limited accuracy based on the fineness of the discretization.
+	\item Long flight durations increases the problem size.
+	\item Trajectories with multiple revolutions can be difficult to handle in the Cartesian coordinate system.
+	\item Accurate initial guesses are needed as such problems are typically handled by gradient optimization methods due to the large size of the NLP.
+\end{itemize}
+\subsection{Indirect approach to optimal control}
+By means of calculus of variations or by the application of Pontryagin's minimum principle \citep{lev_semenovich_mathematical_1987}, the optimal control problem is transformed into a TPBVP. This TPBVP has to be solved in order to obtain the optimal trajectory. The optimal control law is determined as a function of the new costate variables that are introduced \citep{kirk_optimal_2012}. These TPBVPs can be solved by a variety of methods including shooting methods, gradient descent algorithms and evolutionary algorithms. The terminal cost function is typically set as the objective function for the optimizers with search bounds on the initial costate values that are to be determined.
+\subsubsection{Merits of indirect optimal control}
+\begin{itemize}
+	\item High accuracy
+	\item Small size of the optimization problem (does not increase with flight duration).
+	\item Guesses are needed only for the few initial costate variables.
+	\item Powerful mathematical tools available for the optimal control analysis.
+\end{itemize}
+\subsubsection{Demerits of indirect optimal control}
+\begin{itemize}
+	\item TPBVP solution may be very difficult due to numerical sensitivity.
+	\item Accurate adaptive numerical integration schemes are required.
+	\item Tabular data of system parameters cannot be used. Piecewise smooth curve fits are required a priori.
+	\item Highly nonlinear systems may complicate the derivation of the optimal control law.
+\end{itemize}
+
+Weighing the merits and demerits, the indirect approach to optimal control has been selected as the method of choice for all the problems in this study.
+
+\section{Application of the indirect optimal control approach to the single gravitating body system}
+This requires the introduction of the costate variables $[$$\lambda_x$ $\lambda_y$ $\lambda_z$ $\lambda_{v_x}$ $\lambda_{v_y}$ $\lambda_{v_z}$ $\lambda_m$$]$ corresponding to the state variables $[$$x$ $y$ $z$ $v_x$ $v_y$ $v_z$ $m$$]$. The Hamiltonians are formed as follows,
+\nomenclature[g-lambda]{$\lambda$}{costate variable}
+\subsection{Time-optimal Hamiltonian}
+\begin{multline}
+	\boldmath{H_{time}}=1-\lambda_m\bigg(\frac{m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}{g_0 I_{sp}}\bigg)+\lambda_x v_x + \lambda_y v_y + \lambda_z v_z +\lambda_{v_x}\bigg(-\frac{\mu_c x}{r^3}+\alpha_x\bigg)\\
+	+\lambda_{v_y}\bigg(-\frac{\mu_c y}{r^3}+\alpha_y\bigg)+\lambda_{v_z}\bigg(-\frac{\mu_c z}{r^3}+\alpha_z\bigg)
+\end{multline}
+\nomenclature[f-H]{$\boldmath{H}$}{Hamiltonian}
+\subsection{Fuel-optimal Hamiltonian}
+\begin{multline}
+	\boldmath{H_{fuel}}=(1-\lambda_m)\bigg(\frac{m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}{g_0 I_{sp}}\bigg)+\lambda_x v_x + \lambda_y v_y + \lambda_z v_z +\lambda_{v_x}\bigg(-\frac{\mu_c x}{r^3}+\alpha_x\bigg)\\
+	+\lambda_{v_y}\bigg(-\frac{\mu_c y}{r^3}+\alpha_y\bigg)+\lambda_{v_z}\bigg(-\frac{\mu_c z}{r^3}+\alpha_z\bigg)
+\end{multline}
+
+\subsection{Costate dynamics}
+The costate dynamics provides us with an additional set of ordinary differential equations that have to be solved. This system is required to complete the TPBVP as the optimal control law is a function of the costates at every time instant.
+\subsubsection{Time-optimal costate dynamics}
+\begin{align}
+	\dot{\lambda}_x&=-\frac{\partial \boldmath{H_{time}}}{\partial x}=-\lambda_{v_x}\bigg[-\frac{mu_c}{r^3}+\frac{3\mu_c x}{r^4}\frac{\partial r}{\partial x}\bigg]-\lambda_{v_y}\bigg[\frac{3\mu_c y}{r^4}\frac{\partial r}{\partial x}\bigg]-\lambda_{v_z}\bigg[\frac{3\mu_c z}{r^4}\frac{\partial r}{\partial x}\bigg]\\
+	\dot{\lambda}_y&=-\frac{\partial \boldmath{H_{time}}}{\partial y}=-\lambda_{v_x}\bigg[\frac{3\mu_c x}{r^4}\frac{\partial r}{\partial y}\bigg]-\lambda_{v_y}\bigg[-\frac{mu_c}{r^3}+\frac{3\mu_c y}{r^4}\frac{\partial r}{\partial y}\bigg]-\lambda_{v_z}\bigg[\frac{3\mu_c z}{r^4}\frac{\partial r}{\partial y}\bigg]\\
+	\dot{\lambda}_z&=-\frac{\partial \boldmath{H_{time}}}{\partial z}=-\lambda_{v_x}\bigg[\frac{3\mu_c x}{r^4}\frac{\partial r}{\partial z}\bigg]-\lambda_{v_y}\bigg[\frac{3\mu_c y}{r^4}\frac{\partial r}{\partial z}\bigg]-\lambda_{v_z}\bigg[-\frac{mu_c}{r^3}+\frac{3\mu_c z}{r^4}\frac{\partial r}{\partial z}\bigg]\\
+	\dot{\lambda_{v_x}}&=-\frac{\partial \boldmath{H_{time}}}{\partial v_x}=-\lambda_x\\
+	\dot{\lambda_{v_y}}&=-\frac{\partial \boldmath{H_{time}}}{\partial v_y}=-\lambda_y\\
+	\dot{\lambda_{v_z}}&=-\frac{\partial \boldmath{H_{time}}}{\partial v_z}=-\lambda_z\\
+	\dot{\lambda}_m&=-\frac{\partial \boldmath{H_{time}}}{\partial m}=-\frac{\lambda_m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}{g_0 I_{sp}}
+\end{align}
+\begin{align}
+	\frac{\partial r}{\partial x}=\frac{x}{r}\hspace{15mm}
+	\frac{\partial r}{\partial y}=\frac{y}{r}\hspace{15mm}
+	\frac{\partial r}{\partial z}=\frac{z}{r}
+\end{align}
+\subsubsection{Fuel-optimal costate dynamics}
+The costate dynamics for the fuel optimal problem is the same as the time optimal formulation except for the following modification to the costate equation corresponding to the spacecraft mass,
+\begin{align}
+	\dot{\lambda}_m&=-\frac{\partial \boldmath{H_{fuel}}}{\partial m}=-(1-\lambda_m)\frac{\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}{g_0 I_{sp}}
+\end{align}
+When the state and costate equations are grouped together for the three dimensional problem, a set of 14 ordinary differential equations are obtained and these have to be simultaneously propagated in time. 
+\subsection{Reduction of the system of equations}
+The above system of equations for three dimensions consists of 14 ordinary differential equations that have to be simultaneously integrated for long time spans multiple times in order to solve the TPBVP. This imposes significant computational requirements and it is desirable to reduce the number of equations in order to facilitate faster solutions.\\
+From a careful analysis of the above systems of equations, it is possible to verify the following results,
+\subsubsection{Time-optimal formulation}
+\begin{align}
+	\dot{m}\lambda_m=\dot{\lambda}_m m
+\end{align}
+This identity can be used to eliminate the differential equation for $\lambda_m$ and replace it by,
+\begin{align}
+	\lambda_m(t_2)=K\lambda_m(t_1)\frac{m(t_2)}{m(t_1)}
+\end{align}
+Here $K$ is an arbitrary constant that can be set to any desired value. The other costates will scale accordingly.
+\subsubsection{Fuel-optimal formulation}
+\begin{align}
+	m(1-\lambda_m)=Q
+\end{align}
+Here $Q$ is a conserved quantity, the value of which can be set to any value with the other costates scaling accordingly.\\
+The validity of the above equations can be checked by substitution and differentiation. It is possible to utilize these relations to reduce the system of equations by 1. This corresponds to roughly a $7\%$ decrease in computational time. In the current project, the full set of equations is integrated to check whether the solution procedure utilized is capable of satisfying these identities without any extra information. It may be possible to derive other such conserved quantities if differentiable symmetries in the system can be identified. This is in accordance to Noether's theorems of classical mechanics as the state and costate dynamics can be represented as the result of a Hamiltonian formulation. This has not yet been attempted and can be the subject of future investigation.
+
+\section{Application of the indirect optimal control approach to systems with two gravitating bodies}
+This formulation can provide the optimal control law in the case of motion in the planetary sphere of influence along with solar perturbations to the motion. It is also possible to apply the same to the Earth-Moon and other similar systems. This formulation is more general than the restricted three body dynamics as direct ephemeris data on the relative positions of the gravitating bodies can be used for highly accurate realistic trajectory design and optimization. In case only the primary secondary body is required, the other terms can be shut off and the formulation collapses to that of a single body. Here, only the fuel optimal formulation will be presented. Evcurrent formulation is developed for the Sun-Earth and Sun-Mars system, it holds true for the Earth-Moon system as well. When the Moon is taken as the central body, it is sufficient to replace $\mu_p$ with the gravitational parameter of the Moon and $\mu_s$ by the gravitational parameter of the Earth. The rest of the formulation is identical. The same holds true when the Earth is the central body in the Earth-Moon system.
+\subsection{Hamiltonian}
+The fuel optimal Hamiltonian in the two gravitating body, planetocentric framework is as follows,
+\begin{multline}
+	\boldmath{H_{fuel}}=(1-\lambda_m)\bigg(\frac{m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}{g_0 I_{sp}}\bigg)+\lambda_x v_x+\lambda_y v_y+\lambda_z v_z\\
+	+\lambda_{v_x}\bigg[-\frac{\mu_p x}{r^3}-\mu_s\bigg(\frac{x_s}{r_s^3}+\frac{x-x_s}{(r-r_s)^3}\bigg)+\alpha_x\bigg]+\lambda_{v_y}\bigg[-\frac{\mu_p y}{r^3}-\mu_s\bigg(\frac{y_s}{r_s^3}+\frac{y-y_s}{(r-r_s)^3}\bigg)+\alpha_y\bigg]\\
+	+\lambda_{v_z}\bigg[-\frac{\mu_p z}{r^3}-\mu_s\bigg(\frac{z_s}{r_s^3}+\frac{z-z_s}{(r-r_s)^3}\bigg)+\alpha_z\bigg]
+\end{multline}
+\subsection{Costate dynamics}
+From the appropriate partial derivatives of the Hamiltonian, the costate dynamics can be derived as follows,
+\begin{align}
+	\dot{\lambda}_x&=-\lambda_{v_x}\bigg[\psi+3\frac{x}{r}\epsilon_x\bigg]-\lambda_{v_y}\bigg[3\frac{x}{r}\epsilon_y\bigg]-\lambda_{v_z}\bigg[3\frac{x}{r}\epsilon_z\bigg]\\
+	\dot{\lambda}_y&=-\lambda_{v_x}\bigg[3\frac{y}{r}\epsilon_x\bigg]-\lambda_{v_y}\bigg[\psi+3\frac{y}{r}\epsilon_y\bigg]-\lambda_{v_z}\bigg[3\frac{y}{r}\epsilon_z\bigg]
+\end{align}
+\begin{align}
+	\dot{\lambda}_z&=-\lambda_{v_x}\bigg[3\frac{z}{r}\epsilon_x\bigg]-\lambda_{v_y}\bigg[3\frac{z}{r}\epsilon_y\bigg]-\lambda_{v_z}\bigg[\psi+3\frac{z}{r}\epsilon_z\bigg]\\
+	\dot{\lambda}_{v_x}&=-\lambda_x\\
+	\dot{\lambda}_{v_y}&=-\lambda_y\\
+	\dot{\lambda}_{v_z}&=-\lambda_z
+\end{align}
+where,
+\begin{align}
+	\psi&=-\frac{\mu_p}{r^3}-\frac{\mu_s}{(r-r_s)^3}\\
+	\epsilon_x&=\frac{\mu_p x}{r^4}+\frac{\mu_s (x-x_s)}{(r-r_s)^4}\\
+	\epsilon_y&=\frac{\mu_p y}{r^4}+\frac{\mu_s (y-y_s)}{(r-r_s)^4}\\
+	\epsilon_z&=\frac{\mu_p z}{r^4}+\frac{\mu_s (z-z_s)}{(r-r_s)^4}\\
+	\dot{\lambda}_m&=-\frac{(1-\lambda_m)\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}{g_0 I_{sp}}
+\end{align}
+The above system of differential equations require $x_s$, $y_s$, $z_s$ and $r_s$ to be known as an explicit function of time. This can be obtained either through looking up an ephemeris or by analytic series expansion. For the purposes of this project, the JPL ephemeris DE430 \citep{folkner2014planetary} has been exclusively utilized wherever necessary. It is referred to the J2000 frame \citep{standish1982orientation}.
+
+\section{Optimal control law}
+The optimal control law is derived using the Pontryagin's minimum principle. It states that the control which minimizes the cost functional also minimizes the Hamiltonian when evaluated along the optimal trajectory. It can be mathematically written as follows,
+\begin{align}
+	\vec{\alpha}^{*}=argmin\{\boldmath{H(\vec{x}^*,\vec{\lambda}^*,\vec{\alpha})})\}
+\end{align}
+The starred quantities represent the respective state and costate vectors as evaluated on the optimal trajectories. $\vec{\alpha}^*$ is the vector of optimal controls and $\vec{\alpha}$ is a vector of only the admissible controls. This is where the control constraints come into play, the minimization of the Hamiltonian must be performed only in the set of feasible controls. This is a constrained minimization problem. 
+For both the single gravitating body and two gravitating body models, the same control law is obtained. 
+\subsection{Time-optimal control law}
+In this case, the minimization is performed with an equality constraint. The method of Lagrange multipliers will suffice.
+The portion of the Hamiltonian that is to be minimized is,
+\begin{align}
+\boldsymbol{H_0}=-\lambda_m\frac{m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}{g_0 I_{sp}}+\lambda_{v_x}\alpha_x+\lambda_{v_y}\alpha_y+\lambda_{v_z}\alpha_z
+\end{align}
+Subject to the constraint,
+\begin{align}
+m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}-T_{max}&= 0\label{con0}
+\end{align}
+The augmented Hamiltonian is formed by introducing the Lagrange multiplier $\mu_0$,
+\nomenclature[g-munot]{$\mu_0$}{Lagrange multiplier}
+\begin{align}
+\boldmath{H'}=\boldsymbol{H_0}+\mu_0(	m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}-T_{max})
+\end{align}
+This results in the following system of equations in the variables [$\alpha_x$ $\alpha_y$ $\alpha_z$ $\mu_0$].
+\begin{align}
+\frac{\partial H'}{\partial \alpha_x}=0\implies-\lambda_m\frac{m}{g_0 I_{sp}}\frac{\alpha_x}{\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}+\lambda_{v_x}+\mu_0\bigg(m\frac{\alpha_x}{	\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}\bigg)&=0\label{eqn1}\\
+\frac{\partial H'}{\partial \alpha_y}=0\implies-\lambda_m\frac{m}{g_0 I_{sp}}\frac{\alpha_y}{\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}+\lambda_{v_y}+\mu_0\bigg(m\frac{\alpha_y}{	\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}\bigg)&=0\label{eqn2}\\
+\frac{\partial H'}{\partial \alpha_z}=0\implies-\lambda_m\frac{m}{g_0 I_{sp}}\frac{\alpha_z}{\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}+\lambda_{v_z}+\mu_0\bigg(m\frac{\alpha_z}{	\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}\bigg)&=0\label{eqn3}\\
+\frac{\partial H'}{\partial \mu_0}=0\implies m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}-T_{max}&=0\label{eqn4}
+\end{align}
+Instead of the equality constraint, it is possible to use the inequality constraint and prove that the optimal control law in the case of the time-optimal formulation corresponds to the thruster always operating at full thrust. Instead of doing the above, it is chosen to go ahead with the equality constraint as it is known a priori that time optimality requires continuous thrusting at the maximum thrust level available at all times.
+The control law is obtained as follows by solving equations \ref{eqn1} to \ref{eqn4} simultaneously,
+\begin{align}
+	\alpha_x&=-\frac{T_{max}\lambda_{v_x}}{m\sqrt{\lambda_{v_x}^2+\lambda_{v_y}^2+\lambda_{v_z}^2}}\\
+	\alpha_y&=-\frac{T_{max}\lambda_{v_y}}{m\sqrt{\lambda_{v_x}^2+\lambda_{v_y}^2+\lambda_{v_z}^2}}\\
+	\alpha_z&=-\frac{T_{max}\lambda_{v_z}}{m\sqrt{\lambda_{v_x}^2+\lambda_{v_y}^2+\lambda_{v_z}^2}}
+\end{align}
+\subsection{Fuel-optimal control law}
+In this case, the minimization is performed with an inequality constraint. The Karush-Kuhn-Tucker conditions need to be applied to perform this minimization.
+The portion of the Hamiltonian that is to be minimized is,
+\begin{align}
+	\boldsymbol{H_0}=(1-\lambda_m)\frac{m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}{g_0 I_{sp}}+\lambda_{v_x}\alpha_x+\lambda_{v_y}\alpha_y+\lambda_{v_z}\alpha_z
+\end{align}
+along with the constraints, 
+\begin{align}
+	m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}-T_{max}&\leq 0\label{con1}\\
+	-m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}&\leq 0\label{con2}
+\end{align}
+The two constraints \ref{con1} and \ref{con2} cannot be active together as they are contradictory. The following cases can be formed.
+\begin{enumerate}
+	\item \ref{con1} only active
+	\item \ref{con2} only active
+	\item No constraints are active
+\end{enumerate}
+These three cases along with the KKT conditions help to reduce the application of the Pontryagin's minimum principle into the solution of a system of nonlinear algebraic equations. 
+Considering the first case, we obtain the augmented Hamiltonian as follows,
+\begin{align}
+	\boldmath{H'}=\boldsymbol{H_0}+l(	m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}-T_{max})
+\end{align}
+Here, $l$ is a KKT multiplier. Upon setting the gradient of the now unconstrained problem to zero, the following equations are obtained.
+\begin{align}
+\frac{\partial H'}{\partial \alpha_x}=0\implies	(1-\lambda_m)\frac{m}{g_0 I_{sp}}\frac{\alpha_x}{\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}+\lambda_{v_x}+l\bigg(m\frac{\alpha_x}{	\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}\bigg)&=0\label{eqna}\\
+\frac{\partial H'}{\partial \alpha_y}=0\implies	(1-\lambda_m)\frac{m}{g_0 I_{sp}}\frac{\alpha_y}{\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}+\lambda_{v_y}+l\bigg(m\frac{\alpha_y}{	\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}\bigg)&=0\label{eqnb}\\
+\frac{\partial H'}{\partial \alpha_z}=0\implies	(1-\lambda_m)\frac{m}{g_0 I_{sp}}\frac{\alpha_z}{\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}+\lambda_{v_z}+l\bigg(m\frac{\alpha_z}{	\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}\bigg)&=0\label{eqnc}\\
+\frac{\partial H'}{\partial l}=0\implies	m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}-T_{max}&=0\label{eqnd}
+\end{align}
+Equations \ref{eqna} to \ref{eqnd} represent a system of four nonlinear equations in four variables [$\alpha_x$ $\alpha_y$ $\alpha_z$ $l$] which have to be solved simultaneously.
+Considering the second case, we obtain the augmented Hamiltonian as follows,
+\begin{align}
+\boldmath{H''}=\boldsymbol{H_0}+l_1(-m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2})
+\end{align}
+Here, $l_1$ is a KKT multiplier. Upon setting the gradient of the now unconstrained problem to zero, the following equations are obtained.
+\begin{align}
+\frac{\partial H''}{\partial \alpha_x}=0\implies(1-\lambda_m)\frac{m}{g_0 I_{sp}}\frac{\alpha_x}{\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}+\lambda_{v_x}-l_1\bigg(m\frac{\alpha_x}{	\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}\bigg)&=0\label{eqne}
+\end{align}
+\begin{align}
+\frac{\partial H''}{\partial \alpha_y}=0\implies (1-\lambda_m)\frac{m}{g_0 I_{sp}}\frac{\alpha_y}{\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}+\lambda_{v_y}-l_1\bigg(m\frac{\alpha_y}{	\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}\bigg)&=0\label{eqnf}\\
+\frac{\partial H''}{\partial \alpha_z}=0\implies(1-\lambda_m)\frac{m}{g_0 I_{sp}}\frac{\alpha_z}{\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}+\lambda_{v_z}-l_1\bigg(m\frac{\alpha_z}{	\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}}\bigg)&=0\label{eqng}\\
+\frac{\partial H''}{\partial l_1}=0\implies m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}&=0\label{eqnh}
+\end{align}
+Equations \ref{eqne} to \ref{eqnh} represent a system of four nonlinear equations in four variables [$\alpha_x$ $\alpha_y$ $\alpha_z$ $l_1$] which have to be solved simultaneously. Solving the equations \ref{eqna} to \ref{eqnd} and \ref{eqne} to \ref{eqnh} leads to the following result. 
+\begin{align}
+	l&=\frac{\sqrt{\lambda_{v_x}^2+\lambda_{v_y}^2+\lambda_{v_z}^2}}{m}-\frac{1-\lambda_m}{g_0 I_{sp}}\\
+	l_1&=-l\label{eqnConning}
+\end{align}
+Equation \ref{eqnConning} implies that the control can never take on an intermediate form as whenever the first constraint becomes inactive, the other one immediately takes over and we need not solve for the third case. This results in a bang-bang control profile as follows. The singular case of $l=0$ can occur only instantaneously in reality and is thus of no significance.
+\begin{align}
+	k&=-\frac{T_{max}/m}{\sqrt{\lambda_{v_x}^2+\lambda_{v_y}^2+\lambda_{v_z}^2}}
+\end{align}
+
+\begin{align}
+\left \{
+\begin{array}{cccc}
+\text{If } l\geq 0, &\alpha_x=k\lambda_{v_x}  &\alpha_y=k\lambda_{v_y} &\alpha_z=k\lambda_{v_z}\\
+\text{If } l<0, &\hspace{-4mm}\alpha_x=0  &\hspace{-4mm}\alpha_y=0 &\hspace{-4mm}\alpha_z=0
+\end{array}
+\right.
+\end{align}
+\section{Choice of numerical integrator}
+The above sets of equations have to be numerically propagated with the given initial conditions. High order, adaptive step size integrators namely the Runge-Kutta-Fehlberg 7(8) scheme or higher are desirable to maintain accuracy while taking large step sizes. Adaptive step size is mandatory as the physics allows for large durations of gradual motion with small rapid movement phases. This can lead to unacceptably large errors if fixed time steps are used. Also, due to the aperiodicity of the solutions in case of non zero thrusting, it is impossible to obtain accurate information on the minimum required step size. Operating at too low step sizes with lower order integrators can lead to huge roundoff errors. Extremely high order schemes like the Runge-Kutta-Feagin schemes \citep{feagin_tenth-order_2007} require large computational effort per time step with diminishing returns on accuracy. This is the reason why the adaptive Runge-Kutta-Fehlberg 7(8) scheme has been the primary choice for all the problems investigated in this project.
+\section{Solution to the two point boundary value problem}
+Differential evolution, a search based global optimization method developed by \cite{storn_differential_1997} is used to solve the TPBVP. The initial costates are set as the optimization variables and the terminal cost function is to be minimized. Every objective function evaluation involves the numerical integration of the trajectory. Differential evolution controls the search based on the operations of crossover, mutation and selection. The algorithm is also elitist leading to rapid convergence. The following steps are to be followed while solving the optimal control trajectory problem.
+\begin{itemize}
+	\item Specify initial conditions.
+	\item Transform all given initial conditions to state vector form. 
+	\item Form the specified number of random population members based on the NP value.
+	\item The initial costates have to be chosen between the specified bounds.
+	\item Perform the DE algorithm. (Details on the DE algorithm and performance and random number generation in Appendix \ref{AppendixA}).
+	\item The DE algorithm in this work is implemented in parallel. Each computer core concurrently propagates and evaluates a trajectory.
+	\item The cost function to be minimized is the terminal cost function. It represents the error in the achievement of the final desired orbit.
+	\item Once the cost function goes below a desired tolerance level, the DE iterations can be terminated.
+	\item The result of this procedure is a set of initial costates.
+	\item These initial costates when used to propagate the state and costate dynamics, lead to an optimal trajectory that delivers the spacecraft from the initial orbit to the desired final orbit.
+\end{itemize}

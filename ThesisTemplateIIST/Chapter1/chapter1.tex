@@ -1,0 +1,44 @@
+%*******************************************************************************
+%*********************************** First Chapter *****************************
+%*******************************************************************************
+
+\chapter{Introduction}  %Title of the First Chapter
+
+\ifpdf
+    \graphicspath{{Chapter1/Figs/Raster/}{Chapter1/Figs/PDF/}{Chapter1/Figs/}}
+\else
+    \graphicspath{{Chapter1/Figs/Vector/}{Chapter1/Figs/}}
+\fi
+
+
+%********************************** %First Section  **************************************
+\section{Problem description}
+A spacecraft which is in an initial specified orbit is to be injected into a prescribed final orbit with maneuvers performed by continuous thrusting with low acceleration levels due to the thrust being very small in magnitude. The final orbit must be exactly achieved along with minimizing the propellant mass or the flight duration based on the mission requirements. The thrust levels computed have to be within the constraints provided and the trajectory is to be computed with high precision to ensure realistic mission design. The numerical trajectory optimization method should be computationally fast and easily amenable to parallelization. The numerical integration must be able to take adaptive time steps in order to satisfy all accuracy requirements. The method must not demand an accurate initial guess for the solution. Additionally, no prior information on coasting should be required. This reduces the problem to determining the thrust vector direction and magnitude as a function of time in a low thrust transfer for the objective to be realized. The departure and arrival orbits of the spacecraft can be either heliocentric, geocentric or selenocentric. The current work solves this problem by using the indirect approach to optimal control. Pontryagin's minimum principle has been applied to transform the optimal control problem into a two point boundary value problem. Most of the results on interplanetary transfers available in literature ignore the gravity fields of the secondary bodies and the transfers are made between the orbits of the planets around the sun. Other results utilize knowledge of the thrust-coast control structure a priori along with homotopy methods to generate fuel optimal trajectories. Here, complete time and fuel optimal transfers have been generated between the parking orbits around the planets including those from low altitudes. The current approach avoids the need for homotopy methods like numerical continuation. There is non requirement for any sort of guesses on the thrust-coast control structure. It is also possible to perform entire transfers between planetary parking orbits near optimally without the need for multi-level optimization. 
+
+
+\section{Low thrust propulsion systems} %Section - 1.1 
+
+In order to perform maneuvers, spacecrafts must possess a system that is capable of imparting a velocity change. These are usually reaction based systems like thrusters or sails. Sails make use of the momentum transferred to the spacecraft by means of reflecting solar radiation at an appropriate angle. This enables them to perform both inward and outward transfers in the solar system. Thrusters provide the required velocity change by expelling mass in the opposite direction of the required impulse. They fall into the following broad categories,
+\begin{itemize}
+	\item Cold gas thrusters
+	\item Chemical propulsion systems
+	\item Nuclear thermal propulsion systems
+	\item Electric propulsion systems
+\end{itemize}
+Cold gas thrusters provide impulse by expelling matter stored under high pressure into the environment through a nozzle. These systems are generally inefficient. Chemical propulsion systems utilize the energy released from combustion to heat the combustion products to a high temperature before passage through the nozzle. These systems utilize the internal energy of the propellants (either mechanical or chemical) to accelerate the exhaust matter. On the other hand, electric propulsion systems energize the exhaust by supplying energy through electrical means. This requires a separate power source and a system to energize the propellant. Typically, such arrangements lead to very high exhaust velocities of the exhaust but the mass flow rate achieved is very low. This leads to a net low thrust level in comparison to the other systems. The advantage lies in the fact that for the same amount of propellant consumed, electric propulsion systems generate much higher velocity impulses. Typical thrust levels range from micro-Newtons to several hundred milli-Newtons with specific impulses ranging from several hundreds to thousands of seconds. Chemical thrusters on the other hand are capable of providing thrust levels from a few Newtons to hundreds of kilo-Newtons. Their specific impulses on the other hand range from $150s$ to $465s$ for cryogenic engines. Nuclear thermal thrusters are similar to electric thrusters in the sense that the energy to the propellant is provided through an external source. A few experimental thrusters have undergone ground testing but safety, cost and weight issues render these systems impractical as of today.
+
+\section{Implications of low thrust levels on orbital maneuvers}
+Due to the low thrust levels, it becomes necessary to continue thrusting for several days to months in order to attain appreciable changes in velocity. The immediate outcome of this is that the spacecraft trajectory no longer moves along conic sections. All orbital parameters can continuously change with time. Unlike chemical thrusters, the burn cannot be approximated as impulsive. This has serious implications on orbital maneuvers that the spacecraft has to perform. It becomes necessary to determine the direction and magnitude of the thrust at every instant of time the thruster is firing. 
+
+
+\section{Problems solved in the present study}
+Some of the problems attempted in this project are planar and three dimensional heliocentric transfers, geosynchronous transfer orbit to geosynchronous orbit transfers including solar and lunar perturbations, transfers from Earth parking orbits to lunar parking orbits and transfers between Earth-Mars parking orbits of arbitrary sizes and inclinations. All these problems are posed as optimal control problems which are then solved by using an optimization technique called differential evolution. Various aspects of these transfers have been analyzed and this report serves to document the aforementioned analysis.\\
+Additionally, as a demonstration of the current formulation's capability, a high thrust soft landing on the surface of a moon of a spacecraft in orbit has been solved and documented in appendix \ref{app2}.
+
+\nomenclature[z-DE]{DE}{Differential Evolution}
+\nomenclature[z-GTO]{GTO}{Geosynchronous Transfer Orbit}
+\nomenclature[z-GSO]{GSO}{Geosynchronous Orbit}
+\nomenclature[z-EPO]{EPO}{Earth Parking Orbit}
+\nomenclature[z-LEO]{LEO}{Low Earth Orbit}
+\nomenclature[z-MPO]{MPO}{Mars Parking Orbit}
+\nomenclature[z-LMO]{LMO}{Low Mars Orbit}

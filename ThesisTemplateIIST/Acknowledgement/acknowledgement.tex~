@@ -1,0 +1,14 @@
+% ************************** Thesis Acknowledgements **************************
+
+\begin{acknowledgements}      
+
+
+I sincerely thank my mentor Dr. B. R. Vinoth for constantly guiding me throughout the project and giving me enough space to grow as an independent  amateur researcher. He has shown me the path leading to the success in research and I hope to walk through the road in my future. Life at IIST was enjoyable during the days of the project solely because of my beloved friends Tejoshmoy Saha, Aman Chauhan and Yash Joshi who helped me in critical places and their company was a great support. 
+
+I also thank Dr. Prathap C for providing me the data required which served to prove the advantages of global analysis techniques and ultimately bringing out the potential of these techniques to light.  
+
+I sincerely thank all the developers and contributors of opensource projects like Inkscape, gnuplot, GIMP, Paraview, OpenFOAM, \LaTeX. Without their sincere effort and dedication, this work would have been impossible. You guys simply rock!
+
+Finally and most importantly, I must thank my family for all that they have done. I am forever indebted to my Dad and Mom. My brother Thamilarasu had been a constant support and guide in my life. I thank all my well-wishers.
+
+\end{acknowledgements}
