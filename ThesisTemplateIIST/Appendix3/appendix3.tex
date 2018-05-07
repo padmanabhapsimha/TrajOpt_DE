@@ -2,6 +2,12 @@
 
 \chapter{Variable Thrust, Variable Specific Impulse Fuel Optimal Formulation}
 \label{app3}
+\ifpdf
+\graphicspath{{Appendix2/}{Appendix3/}{Appendix3/}}
+\else
+\graphicspath{{Appendix3/}{Appendix3/}}
+\fi
+
 The specific impulse and acceleration vector components are taken to be the controls here. For a three dimensional transfer, this results in four control variables. The state and costate dynamics are invariant. The number of constraints on the feasible set of controls also increases as new constraints appear on the specific impulse. The constraints are as follows,
 \begin{align}
 	m\sqrt{\alpha_x^2+\alpha_y^2+\alpha_z^2}&\leq \frac{2P\eta}{g_0 I_{sp}}\label{c1}\\
