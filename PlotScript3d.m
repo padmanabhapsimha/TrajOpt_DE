@@ -1,7 +1,8 @@
-close all;clear;
-data=importdata('Output.txt');
+close all;clear;clc
+data=importdata('Output_dispOnly.txt');
 sys=importdata('System_params.txt');
 %%
+% data(:,end)=data(:,end)*86400;
 close all;
 figure(1);
 plot3(data(:,1),data(:,2),data(:,3),'k.-','MarkerSize',4.5);
@@ -9,6 +10,8 @@ view([0 0 90]);
 hold on
 T=sys(5);
 mu=sys(1);
+% mu=398600e+9;
+% mu=4.282837e+13;
 g0Isp=sys(3)*sys(4);
 re=sys(9)*sys(6);
 ecci=sys(7);
@@ -65,9 +68,9 @@ r=sqrt(data(:,1).^2+data(:,2).^2+data(:,3).^2);
 v=sqrt(data(:,4).^2+data(:,5).^2+data(:,6).^2);
 figure(3)
 subplot(2,1,1)
-plot(data(:,end)/86400,r/re,'k-')
+plot(data(:,end)/86400,r/1000,'k-')
 grid on;grid minor;
-xlabel('Days');ylabel('Distance units');
+xlabel('Days');ylabel('Distance (km)');
 title('Distance vs time');
 subplot(2,1,2)
 plot(data(:,end)/86400,v/1000,'k-')
@@ -132,7 +135,7 @@ grid on;grid minor
 
 
 title('\lambda_z and \lambda_v_z vs time')
-l=(sqrt(data(:,11).^2+data(:,12).^2+data(:,13).^2)./data(:,7))-((data(:,14))/g0Isp);
+l=(sqrt(data(:,11).^2+data(:,12).^2+data(:,13).^2)./data(:,7))-(1-(data(:,14))/g0Isp);
 % solar electric propulsion
 % T=sys(5).*(sys(9)./r).^2;
 % for i=1:1:length(T)
@@ -155,9 +158,12 @@ end
 end
 accl=sqrt((ax).^2+(ay).^2+(az).^2);
 figure(1)
-hold on
-quiver3(data(:,1),data(:,2),data(:,3),ax,ay,az,0.75,'Color',[0.04314 0.6471 0]);
-legend('Trajectory','Initial orbit','Final orbit','Sun','Spacecraft','Thrust vector')
+% plot3(xi,yi,zi,'b','LineWidth',1.5)
+% hold on
+% plot3(xf,yf,zf,'r','LineWidth',1.5)
+% quiver3(data(:,1),data(:,2),data(:,3),ax,ay,az,0.75,'Color',[0.04314 0.6471 0]);
+% grid on;grid minor;view([0 0 90]);
+% legend('Init orbit','Final orbit','Thrust vector');axis equal;
 %%
 figure(6)
 hx=data(:,2).*data(:,6)-data(:,3).*data(:,5);
@@ -177,12 +183,12 @@ xlabel('Days');ylabel('Semimajor axis (km)');
 title('Semimajor axis vs time');
 
 %%
-figure(8)
-conqty=data(:,7).*data(:,14);
-plot(data(:,end)/86400,conqty,'k-')
-grid on;grid minor;
-xlabel('Days');ylabel('Conserved qty');
-title('Variation of conserved qty')
+% figure(8)
+% conqty=data(:,7).*data(:,14);
+% plot(data(:,end)/86400,conqty,'k-')
+% grid on;grid minor;
+% xlabel('Days');ylabel('Conserved qty');
+% title('Variation of conserved qty')
 % ylim([0.999975*min(conqty) 1.000025*max(conqty)+1])
 %%
 figure(9)
@@ -201,3 +207,10 @@ plot(data(:,end)/86400,eccen,'k-')
 grid on;grid minor;
 xlabel('Days'),ylabel('Eccentricity')
 title('Eccentricity profile')
+%%
+% figure(11)
+% plot(data(:,end)/86400,atan2d(az,(sqrt(ax.^2+ay.^2+az.^2))),'k-')
+% grid on;grid minor
+% figure(12)
+% plot(data(:,end)/86400,atan2d(ay,ax),'k-')
+% grid on;grid minor

@@ -1,6 +1,9 @@
-close all;clear;clc
-data=importdata('Output.txt');
-sys=importdata('System_params.txt','\n');
+% close all;clear;clc
+% data=importdata('Output_dispOnly.txt');
+% dataesc=importdata('Output_esc.txt');
+% data(:,55)=data(:,55)+dataesc(end,55);
+% data=[dataesc;data];
+% sys=importdata('System_params.txt','\n');
 close all;
 %%
 mu_s=1.32712440018e+20;
@@ -9,6 +12,7 @@ mu_m=4.282837e+13;
 g0=sys(4);Isp=sys(3);g0Isp=g0*Isp;
 kfac=sys(5);
 a_earthsun=149.597870700e+9;
+a_marssun=227.9e+9;
 %%
 X=data(:,1);Y=data(:,2);Z=data(:,3);VX=data(:,4);VY=data(:,5);VZ=data(:,6);M=data(:,7);
 LX=data(:,8);LY=data(:,9);LZ=data(:,10);LVX=data(:,11);LVY=data(:,12);LVZ=data(:,13);LM=data(:,14);
@@ -22,7 +26,7 @@ t=data(:,55);
 %% geocentric traj
 figure(1)
 subplot(1,3,1)
-plot3(x,y,z,'k.-')
+plot3(x,y,z,'k-')
 axis equal;
 xlim([-max(abs([x;y])) max(abs([x;y]))])
 ylim([-max(abs([x;y])) max(abs([x;y]))])
@@ -31,7 +35,7 @@ view([0 0 90]);
 xlabel('X axis');ylabel('Y axis');title('Geocentric trajectory');
 %% areocentric traj
 subplot(1,3,2)
-plot3(xm,ym,zm,'k.-')
+plot3(xm,ym,zm,'k-')
 axis equal;
 xlim([-max(abs([xm;ym])) max(abs([xm;ym]))])
 ylim([-max(abs([xm;ym])) max(abs([xm;ym]))])
@@ -41,7 +45,7 @@ xlabel('X axis');ylabel('Y axis');title('Mars-centric trajectory');
 %% heliocentric traj
 figure(1)
 subplot(1,3,3)
-plot3(X,Y,Z,'k.-',xE,yE,zE,'b.-',xM,yM,zM,'r.-')
+plot3(X,Y,Z,'k-',xE,yE,zE,'b-',xM,yM,zM,'r-')
 axis equal;
 xlim([-max(abs([X;Y;xM;yM;xE;yE])) max(abs([X;Y;xM;yM;xE;yE]))])
 ylim([-max(abs([X;Y;xM;yM;xE;yE])) max(abs([X;Y;xM;yM;xE;yE]))])
@@ -110,34 +114,45 @@ AX=K.*LVX.*heaviside(L);AY=K.*LVY.*heaviside(L);AZ=K.*LVZ.*heaviside(L);
 k=-(T./m)./costsqrt;
 ax=k.*lvx.*heaviside(l);ay=k.*lvy.*heaviside(l);az=k.*lvz.*heaviside(l);
 figure(1)
-subplot(1,3,1)
-hold on
-quiver3(x,y,z,ax,ay,az,0.0025);
-quiver3(x,y,z,vx,vy,vz,0.0025);
-subplot(1,3,3)
-hold on
-quiver3(X,Y,Z,AX,AY,AZ,0.0125);
-quiver3(X,Y,Z,VX,VY,VZ,0.0125);
+% subplot(1,3,1)
+% hold on
+% quiver3(x,y,z,ax,ay,az,0.0075);
+% quiver3(x,y,z,vx,vy,vz,0.0075);
+% subplot(1,3,2)
+% hold on
+% quiver3(xm,ym,zm,ax,ay,az,0.00125);
+% quiver3(xm,ym,zm,vxm,vym,vzm,0.00125);
+% subplot(1,3,3)
+% hold on
+% quiver3(X,Y,Z,AX,AY,AZ,0.0125);
+% quiver3(X,Y,Z,VX,VY,VZ,0.0125);
+% view([45 45 45 ])
 %% Hamiltonian
 r_soi=a_earthsun*(mu_e/mu_s)^0.4;
+r_soi_m=a_marssun*(mu_m/mu_s)^0.4;
 ACC=sqrt(AX.^2+AY.^2+AZ.^2);
 acc=sqrt(ax.^2+ay.^2+az.^2);
 H=(1-LM).*M.*ACC/g0Isp+LX.*VX+LY.*VY+LZ.*VZ+LVX.*(-mu_s.*X./R.^3+AX)+LVY.*(-mu_s.*Y./R.^3+AY)+LVZ.*(-mu_s.*Z./R.^3+AZ);
 h=(1-lm).*m.*acc/g0Isp+lx.*vx+ly.*vy+lz.*vz+lvx.*(-mu_e.*x./r.^3+ax)+lvy.*(-mu_e.*y./r.^3+ay)+lvz.*(-mu_e.*z./r.^3+az);
-Hinteg=H.*heaviside(r-r_soi)+h.*heaviside(r_soi-r);
+hm=(1-lmm).*m.*acc/g0Isp+lxm.*vxm+lym.*vym+lzm.*vzm+lvxm.*(-mu_m.*xm./rm.^3+ax)+lvym.*(-mu_m.*ym./rm.^3+ay)+lvzm.*(-mu_m.*zm./rm.^3+az);
+Hinteg=H.*heaviside(r-r_soi).*heaviside(rm-r_soi_m)+h.*heaviside(r_soi-r)+hm.*heaviside(r_soi_m-rm);
 figure(5)
-subplot(3,1,1)
+subplot(4,1,1)
 plot(t/86400,H,'k');
 grid on;grid minor;
 xlabel('Time');ylabel('Hamiltonian');title('Heliocentric');
-subplot(3,1,2)
+subplot(4,1,2)
 plot(t/86400,h,'k');
 grid on;grid minor;
 xlabel('Time');ylabel('Hamiltonian');title('Geocentric');
-subplot(3,1,3)
+subplot(4,1,3)
+plot(t/86400,hm,'k');
+grid on;grid minor;
+xlabel('Time');ylabel('Hamiltonian');title('Mars-centric');
+subplot(4,1,4)
 plot(t/86400,Hinteg,'k');
 grid on;grid minor;
-xlabel('Time');ylabel('Hamiltonian');title('Integrated Helio-Geo');
+xlabel('Time');ylabel('Hamiltonian');title('Integrated Helio-Geo-Mars');
 %% costates
 figure(6)
 subplot(3,2,1)
@@ -168,3 +183,8 @@ figure(8)
 plot(t/86400,M.*(1-LM),'k')
 grid on;grid minor;
 xlabel('Time (days)');ylabel('Conserved qty');title('m(1-\lambda_m)');
+%% spacecraft mass variation
+figure(9)
+plot(t/86400,M,'k.-')
+grid on;grid minor;
+xlabel('Time (days)');ylabel('Spacecraft mass');

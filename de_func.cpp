@@ -99,12 +99,15 @@ void de_function(string inputfile,string agentoutputfile,string bestagentfile,st
     }
     fileinput.close();
     fileinput.open(bestagtfile,ios::in);
-    if(rebound){
+    if(rebound!=0){
+        holder.clear();
         for(unsigned int i=0;i<dim;i++){
             fileinput>>inputval;///useful data
             L.at(i)=inputval-newboundlimit.at(i)*abs(inputval);
             H.at(i)=inputval+newboundlimit.at(i)*abs(inputval);
+            holder.push_back(inputval);
         }
+        MyAgent tempBest(holder);
         ///reseed agents within bounds
         for(unsigned int i=0;i<agents_no;i++){
             holder.clear();
@@ -112,6 +115,9 @@ void de_function(string inputfile,string agentoutputfile,string bestagentfile,st
                 holder.push_back(L.at(j)+(H.at(j)-L.at(j))*randgen_real());
             }
             allAgents.at(i)=holder;
+        }
+        if(rebound==2){
+            allAgents.at(0)=tempBest;
         }
     }
     ///INITIALIZE AGENTS WITH SYSTEM PARAMETERS

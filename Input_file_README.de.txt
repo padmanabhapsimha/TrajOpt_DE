@@ -7,16 +7,16 @@ Description of the input file for differential evolution code
 4>  CR value
 5>  F value
 6>  Selector string - details below
-7>  Lower bound of variables to randomly spawn
-8>  Upper bound of variables to randomly spawn
+7>  Lower bound of variables to randomly spawn for each dimension
+8>  Upper bound of variables to randomly spawn for each dimension
 9>  Problem cost function type - details below
 10> Number of threads to use to solve problem
 11> Seed for random number generator
-12> Whether to read from agent input file (0 if no)
+12> Whether to read from agent input file (0 if no, 1 if yes)
 13> Agent input file name
-14> Best agent file
-15> Resize bounds over best agent (0 if no)
-16> Fractional bound limits
+14> Best agent file name
+15> Resize bounds over best agent (0 if no, 1 if yes, 2 if yes and elitist)
+16> Fractional bound limits for each dimension
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Selector string
 carry_toAll -> only provide 1 upper and lower bound and these are used over all dimensions
@@ -52,6 +52,7 @@ Problem cost function listing
 24 - 2D continuous thrusting r based integration termination min fuel
 25 - 3D continuous thrusting fuel optimal general code
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-26 - 3d SOI patched continuous thrusting fuel optimal with frame switching (2 central bodies)
-27 - 3d SOI patched continuous thrusting fuel optimal with frame switching (3 central bodies)
+26 - 3d SOI patched continuous thrusting fuel optimal with frame switching (2 central bodies) - USE FOR EARTH-MOON SYSTEM
+27 - 3d SOI patched continuous thrusting fuel optimal with frame switching (3 central bodies) - USE FOR SUN-EARTH-MARS SYSTEM
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+28 - 3D single central body variable Isp fuel optimal

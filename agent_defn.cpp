@@ -46,7 +46,8 @@ inline void Agent<Agent_data>::params_init(const string inpfile){
         >>params.a_tol>>params.integ_tol>>params.maxstep>>params.termination_type>>params.inclf>>params.raanf
         >>params.raani>>params.omegai>>params.incli>>params.mu_e>>params.startbody>>params.ephem_file
         >>params.a_second>>params.julian_start>>params.rfinal>>params.endbody>>params.printframe>>params.maxstepcount
-        >>params.mu_m>>params.a_third>>params.parking_transfer>>params.finaliz_rendez;
+        >>params.mu_m>>params.a_third>>params.parking_transfer>>params.finaliz_rendez>>params.outputfile
+        >>params.initwrite>>params.Pmax>>params.effic>>params.IspMax>>params.IspMin;
         params.raanf*=3.1415926535897932384626433832795028/180.0;
         params.inclf*=3.1415926535897932384626433832795028/180.0;
         params.omegaf*=3.1415926535897932384626433832795028/180.0;
