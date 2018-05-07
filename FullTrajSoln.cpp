@@ -13,6 +13,7 @@
 /// ///////////////////////////////////////////////////////////////////////////////
 #include"FullTrajSoln.hpp"
 #include<fstream>
+#include<cstdlib>
 #include<thread>
 #include<array>
 #include<string>
@@ -21,26 +22,54 @@
 #include<boost/numeric/odeint.hpp>
 /// ///////////////////////////////////////////////////////////////////////////////
 namespace fileLocal_FullTrajSoln{
-    std::fstream fileout2("Output.txt",std::ios::out);///file handle auto closed due to RAII
-    auto write_cout=[&](const auto &xfr1,const auto &xfr2,const auto &xfr3,const auto &xE,const auto &xM,const double &t)
+    auto write_cout=[&](const auto &xfr1,const auto &xfr2,const auto &xfr3,const auto &xE,const auto &xM,const double &t,
+                        auto &fileout2,const auto &julianstart,const bool &initCondprint,const auto&initwrite)
     {
-        fileout2.precision(17);
-        for(unsigned int i=0;i<xfr1.size();i++){
-            fileout2<<xfr1.at(i)<<"\t";
+        auto printer_lambda=[&](auto &fileoutobj){
+            fileoutobj.precision(17);
+            for(unsigned int i=0;i<xfr1.size();i++){
+                fileoutobj<<xfr1.at(i)<<"\t";
+            }
+            for(unsigned int i=0;i<xfr2.size();i++){
+                fileoutobj<<xfr2.at(i)<<"\t";
+            }
+            for(unsigned int i=0;i<xfr3.size();i++){
+                fileoutobj<<xfr3.at(i)<<"\t";
+            }
+            for(unsigned int i=0;i<xE.size();i++){
+                fileoutobj<<xE.at(i)<<"\t";
+            }
+            for(unsigned int i=0;i<xM.size();i++){
+                fileoutobj<<xM.at(i)<<"\t";
+            }
+            fileoutobj<<t<<std::endl;
+        };
+        printer_lambda(fileout2);
+        if(initCondprint&&initwrite){///for reinitialization purposes
+            std::fstream fileout3("InitConds.txt",std::ios::out);
+            printer_lambda(fileout3);
+            fileout3<<"\t"<<julianstart;
         }
-        for(unsigned int i=0;i<xfr2.size();i++){
-            fileout2<<xfr2.at(i)<<"\t";
+    };
+    auto read_initConds=[&](auto &xfr1,auto &xfr2,auto &xfr3,auto &julianstart){
+        std::fstream filein("InitConds.txt",std::ios::in);
+        if(!filein.good()){
+            exit(-1);
         }
-        for(unsigned int i=0;i<xfr3.size();i++){
-            fileout2<<xfr3.at(i)<<"\t";
+        for(unsigned int i=0;i<14;i++){
+            filein>>xfr1.at(i);
         }
-        for(unsigned int i=0;i<xE.size();i++){
-            fileout2<<xE.at(i)<<"\t";
+        for(unsigned int i=0;i<14;i++){
+            filein>>xfr2.at(i);
         }
-        for(unsigned int i=0;i<xM.size();i++){
-            fileout2<<xM.at(i)<<"\t";
+        for(unsigned int i=0;i<14;i++){
+            filein>>xfr3.at(i);
         }
-        fileout2<<t<<std::endl;
+        double dummy;
+        for(unsigned int i=0;i<2*6;i++){
+            filein>>dummy;
+        }
+        filein>>dummy>>julianstart;
     };
 }
 /// ///////////////////////////////////////////////////////////////////////////////
@@ -59,13 +88,18 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
                            Agent_datatype &massfrac)
 {
     using namespace fileLocal_FullTrajSoln;
+    std::fstream fileobj(params.outputfile,std::ios::out);///file handle auto closed due to RAII
+    if(printval){
+        fileobj.close();
+        fileobj.open(params.outputfile,std::ios::app);
+    }
     /// ///////////////////////////////////////////////////////////////////////////////
     /// CONTROLLED STEPPERS
 //    auto controlled_switch_stepper=make_controlled(params.integ_tol,params.integ_tol,0.5*params.maxstep*86400.0,switch_stepper());
     auto controlled_stepper=make_controlled(params.integ_tol,params.integ_tol,params.maxstep*86400.0,stepper_type());
     /// ///////////////////////////////////////////////////////////////////////////////
     wrappy_jpl Ephem_obj(params.ephem_file);///ephemeris object
-    std::array<double,6> state_e,state_m;///of moving frame
+    std::array<double,6> state_e,state_m,state;///of moving frame
     /// PARAMETERS AND VARIABLES
     const double rsol=params.a_second;
     const double mi=params.mi;
@@ -83,7 +117,7 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
     double valx,valy,valz,muval;
     double l,k,costsqrt,T;
     /// ///////////////////////////////////////////////////////////////////////////////
-    int closeplanetID;
+    int frameID=params.startbody;///this needs to be looked up by the planet's dynamics
     auto rhs_helio=[&](const auto &xstate,auto &dxdt,const auto &t){
         /// VARIABLES SETUP
         x=xstate.at(0);y=xstate.at(1);z=xstate.at(2);vx=xstate.at(3);vy=xstate.at(4);vz=xstate.at(5);m=xstate.at(6);
@@ -141,12 +175,18 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
         lx=xstate.at(7);ly=xstate.at(8);lz=xstate.at(9);lvx=xstate.at(10);lvy=xstate.at(11);lvz=xstate.at(12);lm=xstate.at(13);
         r=sqrt(sqr(x)+sqr(y)+sqr(z));r3=cube(r);r4=r3*r;
         ///SUN'S PERTURBATION EFFECT
-//        int planetval=(frameID==1)?3:4;
-//        Ephem_obj.JPL_ecliptic_m_get(julianstart+t/86400.0,11,planetval,state,0);
-//        xs=state.at(0);ys=state.at(1);zs=state.at(2);
-//        rs=sqrt(sqr(xs)+sqr(ys)+sqr(zs));rs3=cube(rs);
-//        xxs=x-xs;yys=y-ys;zzs=z-zs;
-//        rrs=sqrt(sqr(xxs)+sqr(yys)+sqr(zzs));rrs3=cube(rrs);rrs4=rrs3*rrs;
+        int planetval;
+        if(frameID==1){
+            planetval=3;
+        }
+        else if(frameID==2){
+            planetval=4;
+        }
+        Ephem_obj.JPL_ecliptic_m_get(julianstart+t/86400.0,11,planetval,state,0);
+        xs=state.at(0);ys=state.at(1);zs=state.at(2);
+        rs=sqrt(sqr(xs)+sqr(ys)+sqr(zs));rs3=cube(rs);
+        xxs=x-xs;yys=y-ys;zzs=z-zs;
+        rrs=sqrt(sqr(xxs)+sqr(yys)+sqr(zzs));rrs3=cube(rrs);rrs4=rrs3*rrs;
         /// MAX THRUST DETERMINATION
         if(params.NEP==1){
             T=params.kfactor;
@@ -169,15 +209,15 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
         else{
             ax=0.0;ay=0.0;az=0.0;
         }
-        if(m<0.025*mi||r<10000.0e+3){
+        if(m<0.025*mi){
             ax=0.0;ay=0.0;az=0.0;
         }
         accl=sqrt(sqr(ax)+sqr(ay)+sqr(az));
         /// STATE EQUATIONS
         dxdt.at(0)=vx;dxdt.at(1)=vy;dxdt.at(2)=vz;
-        dxdt.at(3)=-(mu_p*x/r3)/**+mu_s*(-(xs/rs3)-(xxs/rrs3))**/+ax;
-        dxdt.at(4)=-(mu_p*y/r3)/**+mu_s*(-(ys/rs3)-(yys/rrs3))**/+ay;
-        dxdt.at(5)=-(mu_p*z/r3)/**+mu_s*(-(zs/rs3)-(zzs/rrs3))**/+az;
+        dxdt.at(3)=-(mu_p*x/r3)+mu_s*(-(xs/rs3)-(xxs/rrs3))+ax;
+        dxdt.at(4)=-(mu_p*y/r3)+mu_s*(-(ys/rs3)-(yys/rrs3))+ay;
+        dxdt.at(5)=-(mu_p*z/r3)+mu_s*(-(zs/rs3)-(zzs/rrs3))+az;
         dxdt.at(6)=-m*accl/g0Isp;
         /// COSTATE EQUATIONS
         rx=x/r;ry=y/r;rz=z/r;
@@ -195,7 +235,6 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
     std::array<double,14> xstate,xfr1,xfr2,xfr3;///xstate-spacecraft local state,xfr1-helio,xfr2-earth,xfr3-areo
     /// ///////////////////////////////////////////////////////////////////////////////
     /// INITIALIZE VALUES HERE
-    int frameID=params.startbody;
     double x0,y0,z0,vx0,vy0,vz0,rp0,H0,aval,pval;
     rp0=params.rpfac*params.rinit;
     aval=rp0/(1.0-params.ecc);
@@ -236,15 +275,42 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
     }
     /// ///////////////////////////////////////////////////////////////////////////////
     double endtime=vals.at(7)*86400.0;
-    double t=0.0,dt=1e-3;
     const double r_soi_sec=params.a_second*pow((params.mu_e/mu_s),0.4);
     const double r_soi_thr=params.a_third*pow((params.mu_m/mu_s),0.4);
     double r2p_e,r2p_m,r2p_e_min,r2p_m_min;
+    double t=0.0,dt=1e-3;
     /// ///////////////////////////////////////////////////////////////////////////////
     Ephem_obj.JPL_ecliptic_m_get(julianstart,3,12,state_e,1);
     xp_e=state_e.at(0);yp_e=state_e.at(1);zp_e=state_e.at(2);vxp_e=state_e.at(3);vyp_e=state_e.at(4);vzp_e=state_e.at(5);
     Ephem_obj.JPL_ecliptic_m_get(julianstart,4,12,state_m,1);
     xp_m=state_m.at(0);yp_m=state_m.at(1);zp_m=state_m.at(2);vxp_m=state_m.at(3);vyp_m=state_m.at(4);vzp_m=state_m.at(5);
+    /// ///////////////////////////////////////////////////////////////////////////////
+    /// IF SPECIFIED INITIAL CONDITIONS ARE AVAILABLE
+    if(params.finaliz_rendez){
+        read_initConds(xfr1,xfr2,xfr3,julianstart);
+        r2p_e=sqrt(sqr(xfr2.at(0))+sqr(xfr2.at(1))+sqr(xfr2.at(2)));
+        r2p_m=sqrt(sqr(xfr3.at(0))+sqr(xfr3.at(1))+sqr(xfr3.at(2)));
+        if(r2p_m<r_soi_thr){
+            frameID=2;
+            xstate=xfr3;
+        }
+        else if(r2p_m<r_soi_sec){
+            frameID=1;
+            xstate=xfr2;
+        }
+        else{
+            frameID=0;
+            xstate=xfr1;
+        }
+        Ephem_obj.JPL_ecliptic_m_get(julianstart,3,12,state_e,1);
+        xp_e=state_e.at(0);yp_e=state_e.at(1);zp_e=state_e.at(2);vxp_e=state_e.at(3);vyp_e=state_e.at(4);vzp_e=state_e.at(5);
+        Ephem_obj.JPL_ecliptic_m_get(julianstart,4,12,state_m,1);
+        xp_m=state_m.at(0);yp_m=state_m.at(1);zp_m=state_m.at(2);vxp_m=state_m.at(3);vyp_m=state_m.at(4);vzp_m=state_m.at(5);
+        for(unsigned int i=0;i<7;i++){
+            xstate.at(i+7)=(vals.at(i));///INIT COSTATES
+        }
+    }
+    /// ///////////////////////////////////////////////////////////////////////////////
     if(frameID==0){
         xfr1=xstate;
         xfr2=xfr1;
@@ -267,7 +333,7 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
         xfr2.at(0)-=xp_e;xfr2.at(1)-=yp_e;xfr2.at(2)-=zp_e;xfr2.at(3)-=vxp_e;xfr2.at(4)-=vyp_e;xfr2.at(5)-=vzp_e;
     }
     if(printval){
-        write_cout(xfr1,xfr2,xfr3,state_e,state_m,t);
+        write_cout(xfr1,xfr2,xfr3,state_e,state_m,t,fileobj,julianstart+t/86400.0,false,params.initwrite);
     }
     /// ///////////////////////////////////////////////////////////////////////////////
     /// INTEGRATION ROUTINE
@@ -339,7 +405,7 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
             std::cout<<std::endl<<"This should not happen during integration "<<r2p_e<<"\t"<<r2p_m<<std::endl;
         }
         if(printval){///PRINT TO FILE IF SPECIFIED
-            write_cout(xfr1,xfr2,xfr3,state_e,state_m,t);
+            write_cout(xfr1,xfr2,xfr3,state_e,state_m,t,fileobj,julianstart+t/86400.0,false,params.initwrite);
         }
         ///PLANET CENTRIC DISTANCES
         r2p_e=sqrt(sqr(xfr2.at(0))+sqr(xfr2.at(1))+sqr(xfr2.at(2)));
@@ -347,7 +413,7 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
         r2p_e_min=(r2p_e<r2p_e_min)?r2p_e:r2p_e_min;
         r2p_m_min=(r2p_m<r2p_m_min)?r2p_m:r2p_m_min;
         dt=(dt>86400.0*params.maxstep)?86400.0*params.maxstep:dt;
-        dt=((r2p_e<=3.75*r_soi_sec||r2p_m<7.5*r_soi_thr)&&dt>8640.0*params.maxstep)?8640.0*params.maxstep:dt;
+        dt=((r2p_e<=1.25*r_soi_sec||r2p_m<7.5*r_soi_thr)&&dt>8640.0*params.maxstep)?8640.0*params.maxstep:dt;
     }
     dt=endtime-t;
     double dtlast=dt;
@@ -397,7 +463,7 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
     r2p_e_min=(r2p_e<r2p_e_min)?r2p_e:r2p_e_min;
     r2p_m_min=(r2p_m<r2p_m_min)?r2p_m:r2p_m_min;
     if(printval){
-        write_cout(xfr1,xfr2,xfr3,state_e,state_m,endtime);
+        write_cout(xfr1,xfr2,xfr3,state_e,state_m,endtime,fileobj,julianstart+t/86400.0,true,params.initwrite);
     }
     /// ///////////////////////////////////////////////////////////////////////////////
     /// COST FUNCTION EVALUTATION
@@ -467,8 +533,8 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
         Ephem_obj.JPL_ecliptic_m_get(julianstart+endtime/86400.0,4,12,state_m,1);
         xp_m=state_m.at(0);yp_m=state_m.at(1);zp_m=state_m.at(2);vxp_m=state_m.at(3);vyp_m=state_m.at(4);vzp_m=state_m.at(5);
     }
-    r2p/=sqrt(sqr(xp_m)+sqr(yp_m)+sqr(zp_m));
-    double cost_val2=(sqr(xfr1.at(0)-xp_m)+sqr(xfr1.at(1)-yp_m)+sqr(xfr1.at(2)-zp_m))/(sqr(xp_m)+sqr(yp_m)+sqr(zp_m));
+//    r2p/=sqrt(sqr(xp_m)+sqr(yp_m)+sqr(zp_m));
+    double cost_val2=abs(sqr(xfr1.at(0)-xp_m)+sqr(xfr1.at(1)-yp_m)+sqr(xfr1.at(2)-zp_m))/(sqr(xp_m)+sqr(yp_m)+sqr(zp_m));
     cost_val2+=(sqr(xfr1.at(3)-vxp_m)+sqr(xfr1.at(4)-vyp_m)+sqr(xfr1.at(5)-vzp_m))/(sqr(vxp_m)+sqr(vyp_m)+sqr(vzp_m));
     double retval;
     if(frameID!=params.endbody){
@@ -482,6 +548,14 @@ Agent_datatype _fullSoln_cost(sys_pars<Agent_datatype> &params,const std::vector
 //    }
     if(params.parking_transfer==0){
         retval=cost_val2;
+    }
+    else if(params.parking_transfer==2){
+        if(params.startbody==1){
+            retval=-(0.5*(sqr(xfr2.at(3))+sqr(xfr2.at(4))+sqr(xfr2.at(5)))-params.mu_e/sqrt(sqr(xfr2.at(0))+sqr(xfr2.at(1))+sqr(xfr2.at(2))));
+        }
+        else if(params.startbody==2){
+            retval=-(0.5*(sqr(xfr3.at(3))+sqr(xfr3.at(4))+sqr(xfr3.at(5)))-params.mu_m/sqrt(sqr(xfr3.at(0))+sqr(xfr3.at(1))+sqr(xfr3.at(2))));
+        }
     }
     if(abs(dtlast)>params.maxstep*86400.0){
         retval+=(sqr(dtlast));

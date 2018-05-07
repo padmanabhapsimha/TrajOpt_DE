@@ -2,6 +2,7 @@
 #include"dataTYPE.hpp"
 #include"3bodyfunction.hpp"
 #include"FullTrajSoln.hpp"
+#include"varIsp_func.hpp"
 #include<cmath>
 #include<vector>
 #include<boost/numeric/odeint.hpp>
@@ -620,7 +621,7 @@ Agent_data Agent<Agent_data>::cost_fn(const int &selector)
 //            cost_val=abs((ra-rc)/1000.0);
 //            double velx,vely,rex,rey;
 //            rex=x.at(0)/rc;rey=x.at(1)/rc;
-//            velx=-0.01*rex;vely=-0.01*rey;
+//            velx=-25.00*rex;vely=-25.00*rey;
 //            cost_val+=abs(x.at(2)-velx)+abs(x.at(3)-vely);
 
             break;
@@ -1197,18 +1198,33 @@ Agent_data Agent<Agent_data>::cost_fn(const int &selector)
             cost_val+=sqr(ey-eyi);
             cost_val+=sqr(ez-ezi);
             massfrac=(mi-x.at(6))/mi;
-            cost_val*=(cost_val<1e-2)?massfrac:1.0;
+//            cost_val*=(cost_val<1e-2)?massfrac:1.0;
             ///UNCOMMENT BELOW LINE FOR PLANETARY ESCAPE
 //            cost_val=-(0.5*sqr(vfc)-mu/rfc)/1e8;
 
 ///optimal landing
-            cost_val=abs((rpf-rfc)/1000.0);
-            double velx,vely,rex,rey;
-            rex=x.at(0)/rfc;rey=x.at(1)/rfc;
-            velx=-0.01*rex;vely=-0.01*rey;
-            cost_val+=abs(x.at(3)-velx)+abs(x.at(4)-vely);
+//            cost_val=abs((rpf-rfc)/1000.0);
+//            double velx,vely,rex,rey;
+//            rex=x.at(0)/rfc;rey=x.at(1)/rfc;
+//            velx=-25.00*rex;vely=-25.0*rey;
+//            cost_val+=abs(x.at(3)-velx)+abs(x.at(4)-vely);
 
 
+
+            ///UNCOMMENT BELOW LINE FOR ACHIEVING LONGITUDE IN GTO-GSO TRANSFER
+            ///ASSUMING GSO is in X-Y plane
+//            double theta=2.0*pi*vals.at(7);
+//            double perigee_offset=180.0*(pi/180.0);
+//            double xfin=rpf*cos(theta+perigee_offset);
+//            double yfin=rpf*sin(theta+perigee_offset);
+//            double zfin=0.0;
+//            double vtot=sqrt(params.mu/rpf);
+//            double vxfin=vtot*cos(theta+perigee_offset+pi/2.0);
+//            double vyfin=vtot*sin(theta+perigee_offset+pi/2.0);
+//            double vzfin=0.0;
+//            double cost_val2=(sqr(xfin-x.at(0))+sqr(yfin-x.at(1))+sqr(zfin-x.at(2)))/sqr(rpf);
+//            cost_val2+=(sqr(vxfin-x.at(3))+sqr(vyfin-x.at(4))+sqr(vzfin-x.at(5)))/sqr(vtot);
+//            cost_val+=sqrt(cost_val2);
 
             break;
         }
@@ -1221,6 +1237,11 @@ Agent_data Agent<Agent_data>::cost_fn(const int &selector)
             ///complete parking orbit to parking orbit transfer
             ///ephemeris model type
             cost_val=_fullSoln_cost(params,vals,false,massfrac);
+            break;
+        }
+    case 28:{
+            ///variable specific impulse fuel optimal formulation
+            cost_val=_varIsp_cost(params,vals,false,massfrac);
             break;
         }
     default:{

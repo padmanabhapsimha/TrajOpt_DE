@@ -2,6 +2,7 @@
 #include"dataTYPE.hpp"
 #include"3bodyfunction.hpp"
 #include"FullTrajSoln.hpp"
+#include"varIsp_func.hpp"
 
 #include<cmath>
 #include<vector>
@@ -1127,6 +1128,11 @@ Agent_data Agent<Agent_data>::cost_fn_print(const int &selector)
             ///complete parking orbit to parking orbit transfer
             ///ephemeris model type
             cost_val=_fullSoln_cost(params,vals,true,massfrac);
+            break;
+        }
+    case 28:{
+            ///variable specific impulse trajectories
+            cost_val=_varIsp_cost(params,vals,true,massfrac);
             break;
         }
     default:{

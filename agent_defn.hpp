@@ -45,6 +45,12 @@ public:
     Agent_data a_third;///third body semi-major axis from overall central
     int parking_transfer;///rendezvous with planet orbit or transfer to parking orbit
     int finaliz_rendez;///perform final orbit corrections to planetary rendezvous
+    std::string outputfile;///timestep output file
+    int initwrite;///write finalize rendezvous init conditions to file
+    Agent_data Pmax;///variable isp max available power
+    Agent_data effic;///variable isp nominal efficiency
+    Agent_data IspMax;///variable isp max available isp
+    Agent_data IspMin;///variable isp min available isp
 };
 /**< THIS CLASS IS USED FOR CONVENIENT HANDLING OF AGENTS */
 /**< CLASS IS TEMPLATED SO THAT EITHER FLOAT, DOUBLE, LONG DOUBLE ETC CAN BE CHOSEN */
