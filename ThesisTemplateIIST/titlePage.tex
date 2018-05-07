@@ -1,0 +1,69 @@
+\documentclass[10pt,a4paper,final]{report}
+
+\usepackage{graphicx}
+\usepackage[numbers,sort,authoryear]{natbib}
+\usepackage[margin=1in]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titling}
+\usepackage{datetime}
+\usepackage{setspace}
+
+\usepackage{nomencl}
+\makenomenclature{}
+
+\usepackage{times}
+
+\newcommand{\padtitle}{Optimal Low Thrust Transfers Between Planetary Parking Orbits}
+\newcommand{\padname}{Padmanabha Prasanna Simha}
+\newcommand{\padscode}{SC14B034}
+\newcommand{\padguide}{Dr Ramanan R. V}
+
+\setlength{\droptitle}{-3.0cm}
+\pretitle{ \begin{center}\begin{spacing}{2.5}}
+    \title{{\huge \textbf{{\padtitle{}}}}}
+    \posttitle{\end{spacing}
+    \begin{spacing}{1.7}
+      {\large \textbf{\textit{A Report submitted\\
+            in partial fulfilment for the Degree of}\\
+          Bachelor of Technology\\
+          in\\
+          Aerospace Engineering}\par}
+    \end{spacing}
+  \end{center} }
+
+\preauthor{ \vspace{-1.3cm}
+  \begin{center}\begin{spacing}{2} {\large \textbf{\textit{by}} \par}}
+    \author{{\LARGE \textbf{{\padname{}}}\\ }}
+    \postauthor{\vspace{-0.6cm}
+      {\LARGE (\padscode)\par}
+      \vspace{-0.2cm}
+      {\large pursued in\par}
+      {\large \begin{spacing}{2.0}
+          \textbf{Department of Aerospace Engineering} \par
+          \textbf{Indian Institute of Space Science and Technology}
+        \end{spacing}\par
+        to }
+    \end{spacing}
+  \end{center}
+} 
+
+\predate{\begin{center}\begin{spacing}{1.5}
+    \includegraphics[scale=0.6]{Figs/logo}\\
+    \Large \textbf{INDIAN INSTITUTE OF SPACE SCIENCE AND TECHNOLOGY\\
+      THIRUVANANTHAPURAM}\\ }
+  \newdateformat{monthyear}{\monthname[4] \THEYEAR}
+  \date{\textbf{\monthyear\today}}
+  \postdate{\end{spacing}\end{center}}
+
+\begin{document}
+\maketitle{}
+
+%\input{Bonafide/Bonafide}
+%\input{Declaration/Declaration}
+
+\bibliographystyle{plainnat}
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
