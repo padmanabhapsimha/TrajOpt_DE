@@ -1,6 +1,6 @@
 % ******************************* Thesis Appendix C ********************************
 
-\chapter{Variable Thrust, Variable Specific Impulse Fuel Optimal Formulation}
+\chapter{Variable Thrust, Variable Specific Impulse Fuel-Optimal Formulation}
 \label{app3}
 \ifpdf
 \graphicspath{{Appendix2/}{Appendix3/}{Appendix3/}}
@@ -26,19 +26,17 @@ From the Pontryagin's minimum principle, the optimal control law is determined b
 \end{align}
 Performing this minimization requires the application of the KKT conditions as the constraints are inequalities. From inspection, it is evident  that constraints \ref{c1} and \ref{c2} cannot be active together as they are contradictory. Similarly for the constraints \ref{c3} and \ref{c4}. This is due to the single valued nature of the variables. Thus the following possibilities are identified and are handled by forming appropriate augmented Hamiltonians similar to the previous formulation in the main text,
 \begin{enumerate}[label=(\alph*)]
-	\item \ref{c1} active alone
 	\item \ref{c1} and \ref{c3} active together
+	\item \ref{c2} and \ref{c3} active together
 	\item \ref{c1} and \ref{c4} active together
-	\item \ref{c2} active (constraints \ref{c3} and \ref{c4} do not matter in this case)
+	\item \ref{c2} and \ref{c4} active together
 \end{enumerate}
 From this, the following optimal control law is obtained.
 \begin{align}
-	k&=-\frac{\frac{2P\eta}{g_0 I_{sp}}}{m\sqrt{\lambda_{v_x}^2+\lambda_{v_y}^2+\lambda_{v_z}^2}}\\
-	I_{sp}&=\frac{2m(1-\lambda_m)}{g_0\sqrt{\lambda_{v_x}^2+\lambda_{v_y}^2+\lambda_{v_z}^2}}\\
-	l_1&=\frac{\sqrt{\lambda_{v_x}^2+\lambda_{v_y}^2+\lambda_{v_z}^2}}{mI_{sp}}-\frac{1-\lambda_m}{g_0 I_{sp}^2}\\
 	k_{max}&=-\frac{\frac{2P\eta}{g_0 I_{sp_{max}}}}{m\sqrt{\lambda_{v_x}^2+\lambda_{v_y}^2+\lambda_{v_z}^2}}\\
 	k_{min}&=-\frac{\frac{2P\eta}{g_0 I_{sp_{min}}}}{m\sqrt{\lambda_{v_x}^2+\lambda_{v_y}^2+\lambda_{v_z}^2}}\\
-	l_3&=-k_{max}m\sqrt{\lambda_{v_x}^2+\lambda_{v_y}^2+\lambda_{v_z}^2}\bigg[\frac{2(1-\lambda_m)}{g_0 I_{sp_{max}^2}}-\frac{\sqrt{\lambda_{v_x}^2+\lambda_{v_y}^2+\lambda_{v_z}^2}}{m I_{sp_{max}}}\bigg]
+	l_3&=-k_{max}m\sqrt{\lambda_{v_x}^2+\lambda_{v_y}^2+\lambda_{v_z}^2}\bigg[\frac{2(1-\lambda_m)}{g_0 I_{sp_{max}^2}}-\frac{\sqrt{\lambda_{v_x}^2+\lambda_{v_y}^2+\lambda_{v_z}^2}}{m I_{sp_{max}}}\bigg]\\
+	l_1&=\frac{\sqrt{\lambda_{v_x}^2+\lambda_{v_y}^2+\lambda_{v_z}^2}}{mI_{sp}}-\frac{1-\lambda_m}{g_0 I_{sp}^2}
 \end{align}
 \begin{align}
 \begin{array}{cccc}
@@ -54,11 +52,11 @@ It is not necessary to determine the specific impulse when all accelerations are
 \end{array}
 \right.\label{fullthrust}
 \end{align}
-Equations \ref{nothrust} and \ref{fullthrust} represent the fuel optimal control law. The singular cases of $l_1=0$ and $l_3=0$ have been neglected and grouped into the above control law as these cases almost exclusively never occur in application. The case when $l_3=0$ in reality allows for thrusting at intermediate specific impulse levels but this is grouped into the maximum specific impulse case as such singular conditions occur only for a single instant of time and do not affect the dynamics of the problem. Similar reasoning is used to account for grouping the case where $l_1=0$ with the $l_1>0$ case.  It ensures the thruster can operate only in three modes, 
+Equations \ref{nothrust} and \ref{fullthrust} represent the fuel-optimal control law. The singular cases of $l_1=0$ and $l_3=0$ have been neglected and grouped into the above control law as these cases almost exclusively never occur in application. The case when $l_3=0$ in reality allows for thrusting at intermediate specific impulse levels but this is grouped into the maximum specific impulse case as such singular conditions occur only for a single instant of time and do not affect the dynamics of the problem. Similar reasoning is used to account for grouping the case where $l_1=0$ with the $l_1>0$ case.  It ensures the thruster can operate only in three modes, 
 \begin{itemize}
 	\item Zero thrust
 	\item Full available thrust at $I_{sp_{max}}$
 	\item Full available thrust at $I_{sp_{min}}$
 \end{itemize}
 Since the power is a constraint in this situation, the case with $I_{sp_{max}}$ represents the situation the thrust at an intermediate value but the specific impulse set to it's maximum level. The case with $I_{sp_{min}}$ corresponds to the absolute maximum thrust available from the electric propulsion system.\\
-The fuel optimal control law results in this type of a bang-bang control structure. The energy optimal control law as used by \cite{genta_optimal_2016} and \cite{nah_fuel-optimal_2001} on the other hand leads to smooth variations in the control profile for the thrust and specific impulse. It is hypothesized that the solutions obtained from the fuel optimal control law will outperform the ones from the energy optimal law in the case where the specific impulse is taken as an additional control variable. This has been observed in the case where the thrust vector alone is a control variable. Energy optimal control laws lead to smooth control profiles but require greater propellant mass than the fuel optimal formulations.
+The fuel-optimal control law results in this type of a bang-bang control structure. The energy-optimal control law as used by \cite{genta_optimal_2016} and \cite{nah_fuel-optimal_2001} on the other hand leads to smooth variations in the control profile for the thrust and specific impulse. It is seen that the solutions obtained from the fuel-optimal control law outperform the ones from the energy-optimal law in the case where the specific impulse is taken as an additional control variable. Energy-optimal control laws lead to smooth control profiles and faster numerical solutions but require greater propellant mass than what is obtained by fuel-optimal formulations.
