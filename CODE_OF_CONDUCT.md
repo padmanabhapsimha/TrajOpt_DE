@@ -6,19 +6,7 @@ In the interest of fostering an open and welcoming environment, we as contributo
 
 ## Our Standards
 
-Examples of behavior that contributes to creating a positive environment include:
-
-* Not being a pansy fruitcake who can't take a ribbing.
-* Not being a politically correct moron.
-* Treating others how you'd expect them to treat you.
-* Watching the cult classic film, "Gunda" several times over.
-
-Examples of unacceptable behavior by participants include:
-
-* The use of sexualized language or imagery and unwelcome sexual attention or advances
-* Public or private harassment
-* Publishing others' private information, such as a physical or electronic address, without explicit permission
-* Other conduct which could reasonably be considered inappropriate in a professional setting
+Don't muck around too much with dangerous unknown stuff.
 
 ## Our Responsibilities
 
